@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Portfólio de Messyas Gois França, desenvolvedor Full Stack."
+    />
+    <meta name="theme-color" content="#f8f8f6" />
+
+    <title>Messyas Gois França — Desenvolvedor Full Stack</title>
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("portfolio-theme");
+          document.documentElement.dataset.theme =
+            savedTheme ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+        } catch {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 fill=%22%23fdfdfc%22/><text x=%2210%22 y=%2240%22 font-size=%2224%22 fill=%22%239a2944%22>開</text></svg>"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=DM+Mono:wght@300;400&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#conteudo" data-i18n="skip"
+      >Pular para o conteúdo</a
+    >
+
+    <div class="page-shell">
+      <canvas
+        class="particle-field"
+        id="particle-field"
+        aria-hidden="true"
+      ></canvas>
+
+      <header class="site-header">
+        <button
+          class="menu-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="main-navigation"
+        >
+          <span>Menu</span>
+          <span class="menu-icon" aria-hidden="true"></span>
+        </button>
+
+        <nav
+          class="site-nav"
+          id="main-navigation"
+          aria-label="Navegação principal"
+        >
+          <a href="#home" data-i18n="navAbout">Sobre</a>
+          <a href="#projetos" data-i18n="navProjects">Projetos</a>
+          <a href="#contato" data-i18n="navContact">Contatos</a>
+        </nav>
+
+        <div class="nav-controls" aria-label="Preferências do site">
+          <button class="nav-control theme-toggle" type="button">
+            <svg
+              class="theme-icon"
+              viewBox="0 0 24 24"
+              width="17"
+              height="17"
+              aria-hidden="true"
+            >
+              <g class="icon-sun">
+                <circle cx="12" cy="12" r="3.5"></circle>
+                <path
+                  d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"
+                ></path>
+              </g>
+              <path
+                class="icon-moon"
+                d="M19.2 15.2A7.8 7.8 0 0 1 8.8 4.8a7.8 7.8 0 1 0 10.4 10.4Z"
+              ></path>
+            </svg>
+          </button>
+          <button class="nav-control language-toggle" type="button">
+            <span class="language-label">PT</span>
+          </button>
+        </div>
+      </header>
+
+      <main id="conteudo">
+        <section class="hero" id="home" aria-labelledby="hero-title">
+          <div class="section-index hero-section-index reveal">
+            <span>01</span>
+            <span lang="ja">自己紹介</span>
+          </div>
+
+          <div class="hero-copy">
+            <p class="hero-role" data-i18n="role">DESENVOLVEDOR FULL STACK</p>
+            <h1 id="hero-title">Messyas Gois França</h1>
+            <p class="hero-intro" data-i18n="heroIntro">
+              Crio aplicações web que unem interfaces simples, código bem
+              estruturado e soluções pensadas para problemas reais.
+            </p>
+
+            <div class="hero-actions">
+              <a
+                class="outline-button"
+                href="https://wa.me/5592985222779?text=Ol%C3%A1%20Messyas%2C%20encontrei%20seu%20portf%C3%B3lio."
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Conversar com Messyas pelo WhatsApp"
+              >
+                <span data-i18n="contactButton">Contato</span>
+              </a>
+              <a class="corner-button" href="#projetos">
+                <span data-i18n="projectsButton">Projetos</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="section-index-right reveal">
+            <span lang="zh-Hans">个人简介</span>
+            <span>01</span>
+          </div>
+        </section>
+
+        <section
+          class="projects section-grid"
+          id="projetos"
+          aria-labelledby="projects-title"
+        >
+          <div class="section-index reveal">
+            <span>02</span>
+            <span lang="ja">制作物</span>
+          </div>
+
+          <div class="section-content">
+            <div class="section-heading section-heading-minimal reveal">
+              <h2 id="projects-title" data-i18n="projectsTitle">Projetos</h2>
+            </div>
+
+            <ol class="timeline">
+              <li class="timeline-item reveal">
+                <div class="timeline-date">
+                  <strong>2024</strong>
+                  <span data-i18n="p1Date">Projeto Aranouá</span>
+                </div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <article class="timeline-content">
+                  <p class="project-type" data-i18n="p1Type">
+                    Mobile / Visão computacional / Georreferenciamento
+                  </p>
+                  <h3 data-i18n="p1Title">Mapa inteligente de resíduos</h3>
+                  <p data-i18n="p1Description">
+                    Aplicação mobile que detecta resíduos por visão
+                    computacional e registra cada ocorrência com sua localização
+                    geográfica, formando um mapa de calor da região.
+                  </p>
+                  <ul aria-label="Tecnologias utilizadas">
+                    <li>Mobile</li>
+                    <li>Computer Vision</li>
+                    <li>Geolocalização</li>
+                  </ul>
+                </article>
+              </li>
+
+              <li class="timeline-item reveal">
+                <div class="timeline-date">
+                  <strong>2025</strong>
+                  <span data-i18n="p2Date">Projeto Aranouá</span>
+                </div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <article class="timeline-content">
+                  <p class="project-type">Edge AI / OCR / Full stack</p>
+                  <h3 data-i18n="p2Title">
+                    Controle de acesso veicular inteligente
+                  </h3>
+                  <p data-i18n="p2Description">
+                    Sistema com Jetson Nano que detecta placas, extrai o texto
+                    por OCR e automatiza o cadastro e a abertura do acesso para
+                    veículos autorizados.
+                  </p>
+                  <ul aria-label="Tecnologias utilizadas">
+                    <li>Jetson Nano</li>
+                    <li>OCR</li>
+                    <li>NestJS</li>
+                    <li>Next.js</li>
+                    <li>TypeScript</li>
+                    <li>AWS Elastic Beanstalk</li>
+                  </ul>
+                </article>
+              </li>
+
+              <li class="timeline-item reveal">
+                <div class="timeline-date">
+                  <strong>2025</strong>
+                  <span data-i18n="p3Date">Web Academy</span>
+                </div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <article class="timeline-content">
+                  <p class="project-type" data-i18n="p3Type">
+                    Liderança / NLP / Sistemas de recomendação
+                  </p>
+                  <h3>MotoMatch</h3>
+                  <p data-i18n="p3Description">
+                    Assistente conversacional para recomendar smartphones
+                    Motorola. Atuei como líder da equipe Scrum durante o
+                    desenvolvimento da solução.
+                  </p>
+                  <ul aria-label="Tecnologias utilizadas">
+                    <li>NLP</li>
+                    <li>Similaridade</li>
+                    <li>LLM API</li>
+                    <li>Scrum</li>
+                    <li>Recommendation System</li>
+                  </ul>
+                </article>
+              </li>
+
+              <li class="timeline-item timeline-current reveal">
+                <div class="timeline-date">
+                  <strong>2026</strong>
+                  <span data-i18n="p4Date">Atual</span>
+                </div>
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <article class="timeline-content">
+                  <p class="project-type" data-i18n="p4Type">
+                    Hyperautomation / Agentes inteligentes
+                  </p>
+                  <h3>AX Academy</h3>
+                  <p data-i18n="p4Description">
+                    Formação prática em automação, agentes inteligentes,
+                    qualidade de software, modelos locais e aplicações de
+                    inteligência artificial.
+                  </p>
+                  <ul aria-label="Tecnologias utilizadas">
+                    <li>Python</li>
+                    <li>BotCity</li>
+                    <li>Playwright</li>
+                    <li>Selenium</li>
+                    <li>Pytest</li>
+                    <li>Gemma</li>
+                    <li>CI/CD</li>
+                  </ul>
+                </article>
+              </li>
+            </ol>
+          </div>
+
+          <div class="section-index-right reveal">
+            <span lang="zh-Hans">项目</span>
+            <span>02</span>
+          </div>
+        </section>
+        <section
+          class="contact section-grid"
+          id="contato"
+          aria-labelledby="contact-title"
+        >
+          <div class="section-index reveal">
+            <span>03</span>
+            <span lang="ja">連絡先</span>
+          </div>
+
+          <div class="section-content contact-layout">
+            <div class="section-heading section-heading-minimal reveal">
+              <h2 id="contact-title" data-i18n="contactTitle">Contato</h2>
+            </div>
+
+            <div class="contact-links reveal">
+              <a
+                class="contact-primary"
+                href="https://wa.me/5592985222779?text=Ol%C3%A1%20Messyas%2C%20encontrei%20seu%20portf%C3%B3lio."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span data-i18n="whatsapp">WhatsApp</span>
+                <strong>+55 92 98522-2779</strong>
+                <span aria-hidden="true">↗</span>
+              </a>
+              <div class="contact-email">
+                <span data-i18n="email">E-mail</span>
+                <strong>messyasgoisfranca@gmail.com</strong>
+                <button
+                  class="copy-email"
+                  type="button"
+                  data-copy-email="messyasgoisfranca@gmail.com"
+                  data-i18n="copy"
+                  aria-label="Copiar endereço de e-mail"
+                >
+                  Copiar
+                </button>
+              </div>
+              <a
+                href="https://github.com/Messyas"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span data-i18n="github">GitHub</span>
+                <strong>github.com/Messyas</strong>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="section-index-right reveal">
+            <span lang="zh-Hans">联系方式</span>
+            <span>03</span>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>Messyas Gois França © 2026</p>
+        <p lang="ja">開発・設計</p>
+        <a href="#home"><span data-i18n="backToTop">Voltar ao topo</span> ↑</a>
+      </footer>
+    </div>
+  </body>
+</html>
