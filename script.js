@@ -1,228 +1,240 @@
-const rootElement = document.documentElement;
+const root = document.documentElement;
 const themeToggle = document.querySelector(".theme-toggle");
-const languageToggle = document.querySelector(".language-toggle");
-const languageLabel = document.querySelector(".language-label");
-const copyEmailButton = document.querySelector("[data-copy-email]");
-const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+const langToggle = document.querySelector(".lang-toggle");
+const langLabel = document.querySelector(".lang-label");
 const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 const descriptionMeta = document.querySelector('meta[name="description"]');
+const copyButton = document.querySelector("[data-copy-email]");
+const copyLabel = copyButton?.querySelector("[data-i18n]");
 
-const translations = {
-  pt: {
-    skip: "Pular para o conteúdo",
-    navAbout: "Sobre",
-    navProjects: "Projetos",
-    navContact: "Contatos",
-    role: "DESENVOLVEDOR FULL STACK",
-    heroIntro:
-      "Crio aplicações web que unem interfaces simples, código bem estruturado e soluções pensadas para problemas reais.",
-    contactButton: "Contato",
-    projectsButton: "Projetos",
-    projectsTitle: "Projetos",
-    p1Date: "Projeto mobile",
-    p1Type: "Mobile / Visão computacional / Georreferenciamento",
-    p1Title: "Mapa inteligente de resíduos",
-    p1Description:
-      "Aplicação mobile que detecta resíduos por visão computacional e registra cada ocorrência com sua localização geográfica, formando um mapa de calor da região.",
-    p2Date: "Projeto Aranouá",
-    p2Title: "Controle de acesso veicular inteligente",
-    p2Description:
-      "Sistema com Jetson Nano que detecta placas, extrai o texto por OCR e automatiza o cadastro e a abertura do acesso para veículos autorizados.",
-    p3Type: "Liderança / NLP / Sistemas de recomendação",
-    p3Description:
-      "Assistente conversacional para recomendar smartphones Motorola. Atuei como líder da equipe Scrum durante o desenvolvimento da solução.",
-    p4Date: "Atual",
-    p4Type: "Hyperautomation / Agentes inteligentes",
-    p4Description:
-      "Formação prática em automação, agentes inteligentes, qualidade de software, modelos locais e aplicações de inteligência artificial.",
-    contactTitle: "Contato",
-    whatsapp: "WhatsApp",
-    email: "E-mail",
-    github: "GitHub",
-    copy: "Copiar",
-    copied: "Copiado ✓",
-    select: "Selecione",
-    backToTop: "Voltar ao topo",
+/* ---------- Preferências (localStorage pode falhar) ---------- */
+
+const store = {
+  get(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
   },
-  en: {
-    skip: "Skip to content",
-    navAbout: "About",
-    navProjects: "Projects",
-    navContact: "Contact",
-    role: "FULL STACK DEVELOPER",
-    heroIntro:
-      "I build web applications that combine simple interfaces, well-structured code, and solutions designed for real-world problems.",
-    contactButton: "Contact",
-    projectsButton: "Projects",
-    projectsTitle: "Projects",
-    p1Date: "Mobile project",
-    p1Type: "Mobile / Computer vision / Georeferencing",
-    p1Title: "Smart waste mapping",
-    p1Description:
-      "A mobile application that detects waste through computer vision and records each occurrence with its geographic location, creating a regional heat map.",
-    p2Date: "Aranouá Project",
-    p2Title: "Intelligent vehicle access control",
-    p2Description:
-      "A Jetson Nano system that detects license plates, extracts their text through OCR, and automates registration and access for authorized vehicles.",
-    p3Type: "Leadership / NLP / Recommendation systems",
-    p3Description:
-      "A conversational assistant for recommending Motorola smartphones. I worked as the Scrum team lead during the development of the solution.",
-    p4Date: "Current",
-    p4Type: "Hyperautomation / Intelligent agents",
-    p4Description:
-      "Hands-on training in automation, intelligent agents, software quality, local models, and artificial intelligence applications.",
-    contactTitle: "Contact",
-    whatsapp: "WhatsApp",
-    email: "Email",
-    github: "GitHub",
-    copy: "Copy",
-    copied: "Copied ✓",
-    select: "Select",
-    backToTop: "Back to top",
+  set(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      /* o site continua funcionando sem storage */
+    }
   },
 };
 
-function getStoredPreference(key) {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
+/* ---------- Traduções (o HTML já vem em português) ---------- */
+
+const en = {
+  skip: "Skip to content",
+  menu: "Open menu",
+  navProjects: "Projects",
+  navStack: "Stack",
+  navPath: "Path",
+  navContact: "Contact",
+  ctaTalk: "Contact",
+  role: "FULLSTACK DEV · AI &amp; COMPUTER VISION",
+  base: "BASE",
+  localTime: "LOCAL TIME",
+  bio: 'Fullstack dev in <strong>Manaus</strong>, working with web, AI and computer vision. I led the Scrum team behind <a href="#projetos"><strong>MotoMatch</strong></a> at <strong>Web Academy</strong> (UFAM × Motorola), presented a paper at <strong>CBIC 2025</strong> (UFMG) and I\'m now studying hyperautomation and agents at <strong>AX Academy</strong>. I build systems that solve real problems, from a gate that reads license plates to a phone recommender.',
+
+  projectsTitle: "What I build",
+  p1Badge: "WEB ACADEMY · UFAM",
+  p1Desc:
+    "A platform (QualCel AI) that analyzes real e-commerce reviews to extract sentiment and, from a priorities quiz, recommends the ideal Motorola smartphone. I led the Scrum team.",
+  p2Badge: "ANDROID · GAME",
+  p2Desc:
+    "A 2D adventure RPG for Android, built in the Mobile 2D Game Prototyping course of Projeto Aranouá (IFAM). Cute, relaxing atmosphere: a duo of adventurers explores forests and fights monsters.",
+  alsoBuilt: "ALSO BUILT",
+  seeAll: "SEE ALL",
+  m1Type: "VISION",
+  m1Desc:
+    "A gate system that detects plates with YOLO, reads the characters via OCR and registers the vehicle on its own. NestJS backend, Next.js frontend and a FastAPI pipeline.",
+  m2Desc:
+    "Weather alerts built on microservices: AWS Lambda functions send Telegram messages per user profile, with Cognito login and a Next.js dashboard.",
+  m3Title: "Macroplastics detection",
+  m3Type: "PAPER",
+  m3Desc:
+    "Paper presented at CBIC 2025 (UFMG): an ensemble of deep learning models with Weighted Boxes Fusion to detect plastic waste in Manaus streams.",
+  m4Type: "AI",
+  m4Desc:
+    "A reusable Python module for retrieval, structured analysis and agent-driven investigation, in cleanly separated layers and with local models.",
+  m5Desc:
+    'A personal-organization desktop app, "a journal for the lazy", designed to plug in skills, MCPs and coding agents down the road.',
+  m6Type: "AUDIO",
+  m6Desc:
+    "A real-time voice processor for Windows, written in C++20 and 100% local: pitch and formant shifting, voice layers and DSP with no allocation on the audio thread.",
+
+  stackTitle: "Stack",
+  stackLang: "LANGUAGES",
+  stackWeb: "WEB &amp; CLOUD",
+  stackAi: "AI &amp; VISION",
+  stackAuto: "AUTOMATION &amp; QUALITY",
+
+  pathTitle: "Path",
+  colExp: "EXPERIENCE",
+  colEdu: "EDUCATION &amp; RESEARCH",
+  e1Title: "Full Stack · Scrum team lead",
+  e1Type: "R&amp;D project",
+  e2Title: "Intelligent vehicle access control",
+  e2Type: "Project",
+  e3Title: "2D mobile game · Amazon Mages",
+  e3Type: "Prototyping course",
+  e4Title: "Smart waste map",
+  f1Title: "Hyperautomation and intelligent agents",
+  f1Type: "Hands-on training",
+  f1Date: "2026 · current",
+  f2Title: "Macroplastics detection with a deep learning ensemble",
+  f2Type: "Paper presented",
+
+  contactTitle: "Let's talk?",
+  contactLead:
+    "Got a project, an opening, or just want to swap ideas about web, AI or computer vision? Just reach out.",
+  email: "Email",
+  copy: "Copy",
+  backToTop: "Back to top",
+};
+
+const extra = {
+  pt: {
+    copied: "Copiado ✓",
+    select: "Selecione",
+    title: "Messyas Gois França — Dev Fullstack",
+    description:
+      "Portfólio de Messyas Gois França, dev fullstack em Manaus: web, IA e visão computacional.",
+    htmlLang: "pt-BR",
+    toggleLabel: "Switch to English",
+    themeLight: "Mudar para tema claro",
+    themeDark: "Mudar para tema escuro",
+    nav: "Navegação principal",
+  },
+  en: {
+    copied: "Copied ✓",
+    select: "Select",
+    title: "Messyas Gois França — Fullstack Dev",
+    description:
+      "Portfolio of Messyas Gois França, fullstack dev in Manaus: web, AI and computer vision.",
+    htmlLang: "en",
+    toggleLabel: "Mudar para português",
+    themeLight: "Switch to light theme",
+    themeDark: "Switch to dark theme",
+    nav: "Main navigation",
+  },
+};
+
+// guarda o texto original (português) de cada elemento traduzível
+const i18nNodes = [...document.querySelectorAll("[data-i18n]")];
+const ptOriginal = Object.fromEntries(
+  i18nNodes.map((el) => [el.dataset.i18n, el.innerHTML]),
+);
+const ariaNodes = [...document.querySelectorAll("[data-i18n-aria]")];
+const ptAria = Object.fromEntries(
+  ariaNodes.map((el) => [el.dataset.i18nAria, el.getAttribute("aria-label")]),
+);
+
+let lang =
+  store.get("portfolio-language") ||
+  (navigator.language?.toLowerCase().startsWith("pt") ? "pt" : "en");
+if (lang !== "pt" && lang !== "en") lang = "pt";
+
+function applyLanguage(next, persist = false) {
+  lang = next;
+  const dict = lang === "en" ? en : ptOriginal;
+  const meta = extra[lang];
+
+  root.lang = meta.htmlLang;
+  document.title = meta.title;
+  descriptionMeta?.setAttribute("content", meta.description);
+
+  i18nNodes.forEach((el) => {
+    const value = dict[el.dataset.i18n];
+    if (value !== undefined) el.innerHTML = value;
+  });
+  ariaNodes.forEach((el) => {
+    const key = el.dataset.i18nAria;
+    el.setAttribute("aria-label", lang === "en" ? en[key] : ptAria[key]);
+  });
+
+  langLabel.textContent = lang.toUpperCase();
+  langToggle.setAttribute("aria-label", meta.toggleLabel);
+  document.querySelector(".main-nav").setAttribute("aria-label", meta.nav);
+  applyTheme(root.dataset.theme || "dark");
+
+  if (persist) store.set("portfolio-language", lang);
 }
 
-function setStoredPreference(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // The interface still works when storage is unavailable.
-  }
-}
+/* ---------- Tema ---------- */
 
 function applyTheme(theme, persist = false) {
-  rootElement.dataset.theme = theme;
-  themeColorMeta.setAttribute("content", theme === "dark" ? "#151514" : "#f8f8f6");
-  themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+  root.dataset.theme = theme;
+  themeColorMeta?.setAttribute("content", theme === "dark" ? "#0a0a0a" : "#f6f4f0");
   themeToggle.setAttribute(
     "aria-label",
-    theme === "dark"
-      ? currentLanguage === "pt"
-        ? "Mudar para tema claro"
-        : "Switch to light theme"
-      : currentLanguage === "pt"
-        ? "Mudar para tema escuro"
-        : "Switch to dark theme",
+    theme === "dark" ? extra[lang].themeLight : extra[lang].themeDark,
   );
-
-  if (persist) setStoredPreference("portfolio-theme", theme);
-}
-
-const savedLanguage = getStoredPreference("portfolio-language");
-let currentLanguage =
-  savedLanguage === "pt" || savedLanguage === "en"
-    ? savedLanguage
-    : navigator.language.toLowerCase().startsWith("pt")
-      ? "pt"
-      : "en";
-
-function applyLanguage(language, persist = false) {
-  currentLanguage = language;
-  rootElement.lang = language === "pt" ? "pt-BR" : "en";
-  document.title =
-    language === "pt"
-      ? "Messyas Gois França — Desenvolvedor Full Stack"
-      : "Messyas Gois França — Full Stack Developer";
-  descriptionMeta.setAttribute(
-    "content",
-    language === "pt"
-      ? "Portfólio de Messyas Gois França, desenvolvedor Full Stack."
-      : "Portfolio of Messyas Gois França, Full Stack Developer.",
-  );
-
-  document.querySelectorAll("[data-i18n]").forEach((element) => {
-    const translation = translations[language][element.dataset.i18n];
-    if (translation) element.textContent = translation;
-  });
-
-  languageLabel.textContent = language === "pt" ? "PT" : "EN";
-  languageToggle.setAttribute("aria-pressed", String(language === "en"));
-  languageToggle.setAttribute(
-    "aria-label",
-    language === "pt" ? "Switch to English" : "Mudar para português",
-  );
-  document.querySelector(".site-nav").setAttribute(
-    "aria-label",
-    language === "pt" ? "Navegação principal" : "Main navigation",
-  );
-  document.querySelector(".nav-controls").setAttribute(
-    "aria-label",
-    language === "pt" ? "Preferências do site" : "Site preferences",
-  );
-  document.querySelector(".outline-button").setAttribute(
-    "aria-label",
-    language === "pt"
-      ? "Conversar com Messyas pelo WhatsApp"
-      : "Talk to Messyas on WhatsApp",
-  );
-  copyEmailButton?.setAttribute(
-    "aria-label",
-    language === "pt" ? "Copiar endereço de e-mail" : "Copy email address",
-  );
-  document.querySelectorAll(".timeline-content ul").forEach((list) => {
-    list.setAttribute(
-      "aria-label",
-      language === "pt" ? "Tecnologias utilizadas" : "Technologies used",
-    );
-  });
-
-  applyTheme(rootElement.dataset.theme || "light");
-  if (persist) setStoredPreference("portfolio-language", language);
+  if (persist) store.set("portfolio-theme", theme);
 }
 
 themeToggle.addEventListener("click", () => {
-  applyTheme(rootElement.dataset.theme === "dark" ? "light" : "dark", true);
+  applyTheme(root.dataset.theme === "dark" ? "light" : "dark", true);
 });
 
-languageToggle.addEventListener("click", () => {
-  applyLanguage(currentLanguage === "pt" ? "en" : "pt", true);
+langToggle.addEventListener("click", () => {
+  applyLanguage(lang === "pt" ? "en" : "pt", true);
 });
 
-systemTheme.addEventListener("change", (event) => {
-  if (!getStoredPreference("portfolio-theme")) {
-    applyTheme(event.matches ? "dark" : "light");
-  }
-});
+applyLanguage(lang);
 
-applyLanguage(currentLanguage);
+/* ---------- Relógio de Manaus ---------- */
 
-const menuButton = document.querySelector(".menu-button");
-const navigation = document.querySelector(".site-nav");
-const navLinks = [...document.querySelectorAll(".site-nav a")];
+const clock = document.querySelector("#clock");
 
-function closeMenu() {
-  menuButton.setAttribute("aria-expanded", "false");
-  navigation.classList.remove("open");
-  document.body.classList.remove("menu-open");
+function tickClock() {
+  if (!clock) return;
+  const time = new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "America/Manaus",
+  }).format(new Date());
+  clock.textContent = `${time} AMT`;
+}
+
+tickClock();
+setInterval(tickClock, 15000);
+
+/* ---------- Menu mobile ---------- */
+
+const menuButton = document.querySelector(".menu-btn");
+const nav = document.querySelector(".main-nav");
+const navLinks = [...nav.querySelectorAll("a")];
+
+function setMenu(open) {
+  menuButton.setAttribute("aria-expanded", String(open));
+  nav.classList.toggle("open", open);
 }
 
 menuButton.addEventListener("click", () => {
-  const willOpen = menuButton.getAttribute("aria-expanded") === "false";
-
-  menuButton.setAttribute("aria-expanded", String(willOpen));
-  navigation.classList.toggle("open", willOpen);
-  document.body.classList.toggle("menu-open", willOpen);
+  setMenu(menuButton.getAttribute("aria-expanded") !== "true");
 });
-
-navLinks.forEach((link) => link.addEventListener("click", closeMenu));
-
+navLinks.forEach((link) => link.addEventListener("click", () => setMenu(false)));
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") setMenu(false);
+});
 window.addEventListener("resize", () => {
-  if (window.innerWidth > 640) closeMenu();
+  if (window.innerWidth > 720) setMenu(false);
 });
 
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-const revealElements = document.querySelectorAll(".reveal");
+/* ---------- Animação de entrada + seção ativa ---------- */
 
-if (reducedMotion.matches) {
-  revealElements.forEach((element) => element.classList.add("is-visible"));
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const revealEls = document.querySelectorAll(".reveal");
+
+if (reduceMotion || !("IntersectionObserver" in window)) {
+  revealEls.forEach((el) => el.classList.add("is-visible"));
 } else {
   const revealObserver = new IntersectionObserver(
     (entries, observer) => {
@@ -232,251 +244,56 @@ if (reducedMotion.matches) {
         observer.unobserve(entry.target);
       });
     },
-    { threshold: 0.14 },
+    { threshold: 0.12 },
   );
-
-  revealElements.forEach((element) => revealObserver.observe(element));
+  revealEls.forEach((el) => revealObserver.observe(el));
 }
 
-const pageSections = document.querySelectorAll("main section[id]");
-
-const sectionObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-
-      navLinks.forEach((link) => {
-        const isCurrent = link.getAttribute("href") === `#${entry.target.id}`;
-        link.classList.toggle("active", isCurrent);
-
-        if (isCurrent) {
-          link.setAttribute("aria-current", "page");
-        } else {
-          link.removeAttribute("aria-current");
-        }
+if ("IntersectionObserver" in window) {
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        navLinks.forEach((link) => {
+          const current = link.getAttribute("href") === `#${entry.target.id}`;
+          link.classList.toggle("active", current);
+          if (current) link.setAttribute("aria-current", "true");
+          else link.removeAttribute("aria-current");
+        });
       });
-    });
-  },
-  { rootMargin: "-45% 0px -45% 0px" },
-);
+    },
+    { rootMargin: "-40% 0px -55% 0px" },
+  );
+  document.querySelectorAll("main section[id]").forEach((s) => sectionObserver.observe(s));
+}
 
-pageSections.forEach((section) => sectionObserver.observe(section));
+/* ---------- Copiar e-mail ---------- */
 
 async function copyText(text) {
   if (navigator.clipboard && window.isSecureContext) {
     await navigator.clipboard.writeText(text);
     return;
   }
-
-  const temporaryField = document.createElement("textarea");
-  temporaryField.value = text;
-  temporaryField.setAttribute("readonly", "");
-  temporaryField.style.position = "fixed";
-  temporaryField.style.opacity = "0";
-  document.body.appendChild(temporaryField);
-  temporaryField.select();
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.setAttribute("readonly", "");
+  field.style.cssText = "position:fixed;opacity:0";
+  document.body.appendChild(field);
+  field.select();
   document.execCommand("copy");
-  temporaryField.remove();
+  field.remove();
 }
 
-copyEmailButton.addEventListener("click", async () => {
+copyButton?.addEventListener("click", async () => {
   try {
-    await copyText(copyEmailButton.dataset.copyEmail);
-    copyEmailButton.textContent = translations[currentLanguage].copied;
-    copyEmailButton.classList.add("copied");
+    await copyText(copyButton.dataset.copyEmail);
+    copyLabel.textContent = extra[lang].copied;
+    copyButton.classList.add("copied");
   } catch {
-    copyEmailButton.textContent = translations[currentLanguage].select;
+    copyLabel.textContent = extra[lang].select;
   }
-
-  window.setTimeout(() => {
-    copyEmailButton.textContent = translations[currentLanguage].copy;
-    copyEmailButton.classList.remove("copied");
+  setTimeout(() => {
+    copyLabel.textContent = lang === "en" ? en.copy : ptOriginal.copy;
+    copyButton.classList.remove("copied");
   }, 1800);
 });
-
-const particleCanvas = document.querySelector("#particle-field");
-
-if (particleCanvas && !reducedMotion.matches) {
-  const context = particleCanvas.getContext("2d", { alpha: true });
-  const particles = [];
-  const pointer = { x: 0, y: 0, active: false };
-  const maximumPixelRatio = 1.5;
-  const particleMargin = 70;
-  let viewportWidth = 0;
-  let viewportHeight = 0;
-  let targetParticleCount = 0;
-  let animationFrame;
-  let previousTime = performance.now();
-
-  function createParticle(extraDelay = false) {
-    const radius = 0.65 + Math.random() * 1.15;
-    const speed = 0.38 + Math.random() * 0.58;
-    const initialDistance = extraDelay
-      ? Math.min(240, viewportWidth * 0.2)
-      : 90;
-
-    return {
-      x: -particleMargin - Math.random() * initialDistance,
-      y: -particleMargin + Math.random() * (viewportHeight + particleMargin * 2),
-      vx: speed,
-      vy: -0.06 + Math.random() * 0.12,
-      radius,
-      opacity: 0.06 + Math.random() * 0.13,
-      phase: Math.random() * Math.PI * 2,
-      shape: Math.random() < 0.24 ? "square" : "trail",
-    };
-  }
-
-  function resetParticle(particle, extraDelay = false) {
-    Object.assign(particle, createParticle(extraDelay));
-  }
-
-  function resizeParticleField() {
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, maximumPixelRatio);
-    viewportWidth = window.innerWidth;
-    viewportHeight = window.innerHeight;
-    particleCanvas.width = Math.round(viewportWidth * pixelRatio);
-    particleCanvas.height = Math.round(viewportHeight * pixelRatio);
-    particleCanvas.style.width = `${viewportWidth}px`;
-    particleCanvas.style.height = `${viewportHeight}px`;
-    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-
-    const baseParticleCount = Math.min(
-      82,
-      Math.max(34, Math.round((viewportWidth * viewportHeight) / 19000)),
-    );
-    targetParticleCount = Math.round(baseParticleCount * 1.2);
-
-    while (particles.length < targetParticleCount) {
-      particles.push(createParticle(true));
-    }
-
-    if (particles.length > targetParticleCount) {
-      particles.length = targetParticleCount;
-    }
-  }
-
-  function updatePointer(event) {
-    pointer.x = event.clientX;
-    pointer.y = event.clientY;
-    pointer.active = true;
-  }
-
-  window.addEventListener("pointermove", updatePointer, { passive: true });
-  window.addEventListener("pointerdown", updatePointer, { passive: true });
-  window.addEventListener(
-    "pointerup",
-    () => {
-      if (matchMedia("(hover: none)").matches) pointer.active = false;
-    },
-    { passive: true },
-  );
-  document.documentElement.addEventListener("mouseleave", () => {
-    pointer.active = false;
-  });
-
-  function drawParticleField(currentTime) {
-    const elapsed = Math.min((currentTime - previousTime) / 16.667, 2);
-    previousTime = currentTime;
-    context.clearRect(0, 0, viewportWidth, viewportHeight);
-
-    for (let index = 0; index < particles.length; index += 1) {
-      const particle = particles[index];
-
-      if (pointer.active) {
-        const distanceX = pointer.x - particle.x;
-        const distanceY = pointer.y - particle.y;
-        const distanceSquared = distanceX * distanceX + distanceY * distanceY;
-        const influenceRadius = 380;
-
-        if (distanceSquared < influenceRadius * influenceRadius && distanceSquared > 1) {
-          const distance = Math.sqrt(distanceSquared);
-          const gravity = Math.min(0.052, 820 / (distanceSquared + 10000));
-          particle.vx += (distanceX / distance) * gravity * elapsed;
-          particle.vy += (distanceY / distance) * gravity * elapsed;
-        }
-      }
-
-      particle.vx += (0.62 - particle.vx) * 0.0025 * elapsed;
-      particle.vy += Math.sin(currentTime * 0.00045 + particle.phase) * 0.0008 * elapsed;
-
-      const currentSpeed = Math.hypot(particle.vx, particle.vy);
-      if (currentSpeed > 2.1) {
-        particle.vx = (particle.vx / currentSpeed) * 2.1;
-        particle.vy = (particle.vy / currentSpeed) * 2.1;
-      }
-
-      particle.x += particle.vx * elapsed;
-      particle.y += particle.vy * elapsed;
-
-      if (
-        particle.x > viewportWidth + particleMargin ||
-        particle.y < -particleMargin * 1.5 ||
-        particle.y > viewportHeight + particleMargin * 1.5
-      ) {
-        resetParticle(particle);
-        continue;
-      }
-
-      const horizontalFade = Math.min(
-        1,
-        Math.max(0, (particle.x + particleMargin) / 90),
-        Math.max(0, (viewportWidth + particleMargin - particle.x) / 90),
-      );
-
-      const trailLength = 3 + Math.min(8, currentSpeed * 5);
-      const directionX = particle.vx / Math.max(currentSpeed, 0.01);
-      const directionY = particle.vy / Math.max(currentSpeed, 0.01);
-
-      const particleRgb =
-        rootElement.dataset.theme === "dark" ? "205, 205, 198" : "60, 60, 57";
-      const particleColor = `rgba(${particleRgb}, ${particle.opacity * horizontalFade})`;
-
-      if (particle.shape === "square") {
-        const squareSize = particle.radius * 1.8;
-        context.fillStyle = particleColor;
-        context.fillRect(
-          particle.x - squareSize / 2,
-          particle.y - squareSize / 2,
-          squareSize,
-          squareSize,
-        );
-      } else {
-        context.beginPath();
-        context.moveTo(
-          particle.x - directionX * trailLength,
-          particle.y - directionY * trailLength,
-        );
-        context.lineTo(particle.x, particle.y);
-        context.lineWidth = particle.radius;
-        context.lineCap = "round";
-        context.strokeStyle = particleColor;
-        context.stroke();
-      }
-    }
-
-    animationFrame = requestAnimationFrame(drawParticleField);
-  }
-
-  let resizeFrame;
-  window.addEventListener(
-    "resize",
-    () => {
-      cancelAnimationFrame(resizeFrame);
-      resizeFrame = requestAnimationFrame(resizeParticleField);
-    },
-    { passive: true },
-  );
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      cancelAnimationFrame(animationFrame);
-    } else {
-      previousTime = performance.now();
-      animationFrame = requestAnimationFrame(drawParticleField);
-    }
-  });
-
-  resizeParticleField();
-  animationFrame = requestAnimationFrame(drawParticleField);
-}
