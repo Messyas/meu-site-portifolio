@@ -1,482 +1,570 @@
-const rootElement = document.documentElement;
+const root = document.documentElement;
 const themeToggle = document.querySelector(".theme-toggle");
-const languageToggle = document.querySelector(".language-toggle");
-const languageLabel = document.querySelector(".language-label");
-const copyEmailButton = document.querySelector("[data-copy-email]");
-const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+const langToggle = document.querySelector(".lang-toggle");
+const langFlag = document.querySelector(".lang-flag");
 const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 const descriptionMeta = document.querySelector('meta[name="description"]');
+const copyButton = document.querySelector("[data-copy-email]");
+const copyLabel = copyButton?.querySelector("[data-i18n]");
 
-const translations = {
-  pt: {
-    skip: "Pular para o conteúdo",
-    navAbout: "Sobre",
-    navProjects: "Projetos",
-    navContact: "Contatos",
-    role: "DESENVOLVEDOR FULL STACK",
-    heroIntro:
-      "Crio aplicações web que unem interfaces simples, código bem estruturado e soluções pensadas para problemas reais.",
-    contactButton: "Contato",
-    projectsButton: "Projetos",
-    projectsTitle: "Projetos",
-    p1Date: "Projeto mobile",
-    p1Type: "Mobile / Visão computacional / Georreferenciamento",
-    p1Title: "Mapa inteligente de resíduos",
-    p1Description:
-      "Aplicação mobile que detecta resíduos por visão computacional e registra cada ocorrência com sua localização geográfica, formando um mapa de calor da região.",
-    p2Date: "Projeto Aranouá",
-    p2Title: "Controle de acesso veicular inteligente",
-    p2Description:
-      "Sistema com Jetson Nano que detecta placas, extrai o texto por OCR e automatiza o cadastro e a abertura do acesso para veículos autorizados.",
-    p3Type: "Liderança / NLP / Sistemas de recomendação",
-    p3Description:
-      "Assistente conversacional para recomendar smartphones Motorola. Atuei como líder da equipe Scrum durante o desenvolvimento da solução.",
-    p4Date: "Atual",
-    p4Type: "Hyperautomation / Agentes inteligentes",
-    p4Description:
-      "Formação prática em automação, agentes inteligentes, qualidade de software, modelos locais e aplicações de inteligência artificial.",
-    contactTitle: "Contato",
-    whatsapp: "WhatsApp",
-    email: "E-mail",
-    github: "GitHub",
-    copy: "Copiar",
-    copied: "Copiado ✓",
-    select: "Selecione",
-    backToTop: "Voltar ao topo",
+/* ---------- Preferências (localStorage pode falhar) ---------- */
+
+const store = {
+  get(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
   },
-  en: {
-    skip: "Skip to content",
-    navAbout: "About",
-    navProjects: "Projects",
-    navContact: "Contact",
-    role: "FULL STACK DEVELOPER",
-    heroIntro:
-      "I build web applications that combine simple interfaces, well-structured code, and solutions designed for real-world problems.",
-    contactButton: "Contact",
-    projectsButton: "Projects",
-    projectsTitle: "Projects",
-    p1Date: "Mobile project",
-    p1Type: "Mobile / Computer vision / Georeferencing",
-    p1Title: "Smart waste mapping",
-    p1Description:
-      "A mobile application that detects waste through computer vision and records each occurrence with its geographic location, creating a regional heat map.",
-    p2Date: "Aranouá Project",
-    p2Title: "Intelligent vehicle access control",
-    p2Description:
-      "A Jetson Nano system that detects license plates, extracts their text through OCR, and automates registration and access for authorized vehicles.",
-    p3Type: "Leadership / NLP / Recommendation systems",
-    p3Description:
-      "A conversational assistant for recommending Motorola smartphones. I worked as the Scrum team lead during the development of the solution.",
-    p4Date: "Current",
-    p4Type: "Hyperautomation / Intelligent agents",
-    p4Description:
-      "Hands-on training in automation, intelligent agents, software quality, local models, and artificial intelligence applications.",
-    contactTitle: "Contact",
-    whatsapp: "WhatsApp",
-    email: "Email",
-    github: "GitHub",
-    copy: "Copy",
-    copied: "Copied ✓",
-    select: "Select",
-    backToTop: "Back to top",
+  set(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      /* o site continua funcionando sem storage */
+    }
   },
 };
 
-function getStoredPreference(key) {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
+/* ---------- Traduções (o HTML já vem em português) ---------- */
+
+const en = {
+  skip: "Skip to content",
+  menu: "Open menu",
+  navProjects: "Projects",
+  navStack: "Stack",
+  navPath: "Path",
+  navContact: "Contact",
+  treeHome: "Home",
+  ctaTalk: "Contact",
+  role: "Fullstack Dev · Intelligent Agents &amp; Automation",
+  base: "Base",
+  localTime: "Local time",
+  bio: 'Fullstack dev in <a class="elo" href="#trajetoria">Manaus</a>, building intelligent agents and automation. I\'m currently on an LG project focused on automation and AI agents, and I study hyperautomation at <a class="elo" href="#trajetoria">AX Academy</a>. Before that, I was Scrum Master for <a class="elo" href="#projetos">MotoMatch</a> at <a class="elo" href="#trajetoria">Web Academy</a> (UFAM × Motorola) and presented a paper at <a class="elo" href="#trajetoria">CBIC 2025</a>.',
+
+  projectsTitle: "What I build",
+  p1Desc:
+    "A platform (QualCel AI) that analyzes real e-commerce reviews to extract sentiment and, from a priorities quiz, recommends the ideal Motorola smartphone. I was the Scrum Master.",
+  p2Desc:
+    "A 2D adventure RPG for Android, built in the Mobile 2D Game Prototyping course of Projeto Aranouá (IFAM). Cute, relaxing atmosphere: a duo of adventurers explores forests and fights monsters.",
+  alsoBuilt: "Also built",
+  seeAll: "See all",
+  m1Type: "Vision",
+  m1Desc:
+    "A gate that detects plates with YOLO, reads the characters via OCR and registers the vehicle on its own.",
+  m2Desc:
+    "Weather alerts over Telegram, built with AWS Lambda, Cognito login and a Next.js dashboard.",
+  m3Title: "Macroplastics detection",
+  m3Type: "Paper",
+  m3Desc:
+    "CBIC 2025 paper (UFMG): a model ensemble to find plastic waste in Manaus streams.",
+  m4Type: "AI",
+  m4Desc:
+    "A Python module for retrieval and agent-driven investigation, with local models.",
+  m5Desc:
+    '"A journal for the lazy": an organization app with skills, MCPs and agents.',
+  m6Type: "Audio",
+  m6Desc:
+    "A real-time voice processor for Windows, written in C++20 and 100% local.",
+
+  pathTitle: "Path",
+  colExp: "Experience",
+  colEdu: "Education &amp; research",
+  e1Title: "Full Stack · Scrum Master",
+  e1Type: "R&amp;D project",
+  e2Title: "Intelligent vehicle access control",
+  e2Type: "Project",
+  e3Title: "2D mobile game · Amazon Mages",
+  e3Type: "Prototyping course",
+  e4Title: "Smart waste map",
+  f1Title: "Hyperautomation and intelligent agents",
+  f1Type: "Hands-on training",
+  f1Date: "2026 - current",
+  f2Title: "Macroplastics detection with a deep learning ensemble",
+  f2Type: "Paper presented",
+  g1Title: "Systems Analysis and Development",
+  g1Type: "Bachelor's degree",
+  g1Date: "Graduated",
+
+  contactLead: "Open to conversations about intelligent agents, automation and AI projects.",
+  copy: "Copy email",
+  backToTop: "Back to top",
+};
+
+const extra = {
+  pt: {
+    copied: "Copiado ✓",
+    select: "Selecione",
+    title: "Messyas Gois França — Dev Fullstack",
+    description:
+      "Portfólio de Messyas Gois França, dev fullstack em Manaus: agentes inteligentes, automação e IA.",
+    htmlLang: "pt-BR",
+    flag: "🇺🇸",
+    flagTitle: "English",
+    themeLight: "Mudar para tema claro",
+    themeDark: "Mudar para tema escuro",
+    nav: "Navegação principal",
+  },
+  en: {
+    copied: "Copied ✓",
+    select: "Select",
+    title: "Messyas Gois França — Fullstack Dev",
+    description:
+      "Portfolio of Messyas Gois França, fullstack dev in Manaus: intelligent agents, automation and AI.",
+    htmlLang: "en",
+    flag: "🇧🇷",
+    flagTitle: "Português",
+    themeLight: "Switch to light theme",
+    themeDark: "Switch to dark theme",
+    nav: "Main navigation",
+  },
+};
+
+// guarda o texto original (português) de cada elemento traduzível
+const i18nNodes = [...document.querySelectorAll("[data-i18n]")];
+const ptOriginal = {};
+i18nNodes.forEach((el) => {
+  ptOriginal[el.dataset.i18n] ??= el.innerHTML.trim().replace(/\s+/g, " ");
+});
+const ariaNodes = [...document.querySelectorAll("[data-i18n-aria]")];
+const ptAria = Object.fromEntries(
+  ariaNodes.map((el) => [el.dataset.i18nAria, el.getAttribute("aria-label")]),
+);
+
+let lang =
+  store.get("portfolio-language") ||
+  (navigator.language?.toLowerCase().startsWith("pt") ? "pt" : "en");
+if (lang !== "pt" && lang !== "en") lang = "pt";
+
+function applyLanguage(next, persist = false) {
+  lang = next;
+  const dict = lang === "en" ? en : ptOriginal;
+  const meta = extra[lang];
+
+  root.lang = meta.htmlLang;
+  document.title = meta.title;
+  descriptionMeta?.setAttribute("content", meta.description);
+
+  i18nNodes.forEach((el) => {
+    const value = dict[el.dataset.i18n];
+    if (value !== undefined) el.innerHTML = value;
+  });
+  ariaNodes.forEach((el) => {
+    const key = el.dataset.i18nAria;
+    el.setAttribute("aria-label", lang === "en" ? en[key] : ptAria[key]);
+  });
+
+  langFlag.textContent = meta.flag;
+  langToggle.title = meta.flagTitle;
+  langToggle.setAttribute("aria-label", meta.flagTitle);
+  document.querySelector(".nav").setAttribute("aria-label", meta.nav);
+  applyTheme(root.dataset.theme || "dark");
+
+  if (persist) store.set("portfolio-language", lang);
 }
 
-function setStoredPreference(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // The interface still works when storage is unavailable.
-  }
-}
+/* ---------- Tema ---------- */
 
 function applyTheme(theme, persist = false) {
-  rootElement.dataset.theme = theme;
-  themeColorMeta.setAttribute("content", theme === "dark" ? "#151514" : "#f8f8f6");
-  themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+  root.dataset.theme = theme;
+  themeColorMeta?.setAttribute("content", theme === "dark" ? "#0a0a0a" : "#f5f4f0");
   themeToggle.setAttribute(
     "aria-label",
-    theme === "dark"
-      ? currentLanguage === "pt"
-        ? "Mudar para tema claro"
-        : "Switch to light theme"
-      : currentLanguage === "pt"
-        ? "Mudar para tema escuro"
-        : "Switch to dark theme",
+    theme === "dark" ? extra[lang].themeLight : extra[lang].themeDark,
   );
-
-  if (persist) setStoredPreference("portfolio-theme", theme);
-}
-
-const savedLanguage = getStoredPreference("portfolio-language");
-let currentLanguage =
-  savedLanguage === "pt" || savedLanguage === "en"
-    ? savedLanguage
-    : navigator.language.toLowerCase().startsWith("pt")
-      ? "pt"
-      : "en";
-
-function applyLanguage(language, persist = false) {
-  currentLanguage = language;
-  rootElement.lang = language === "pt" ? "pt-BR" : "en";
-  document.title =
-    language === "pt"
-      ? "Messyas Gois França — Desenvolvedor Full Stack"
-      : "Messyas Gois França — Full Stack Developer";
-  descriptionMeta.setAttribute(
-    "content",
-    language === "pt"
-      ? "Portfólio de Messyas Gois França, desenvolvedor Full Stack."
-      : "Portfolio of Messyas Gois França, Full Stack Developer.",
-  );
-
-  document.querySelectorAll("[data-i18n]").forEach((element) => {
-    const translation = translations[language][element.dataset.i18n];
-    if (translation) element.textContent = translation;
-  });
-
-  languageLabel.textContent = language === "pt" ? "PT" : "EN";
-  languageToggle.setAttribute("aria-pressed", String(language === "en"));
-  languageToggle.setAttribute(
-    "aria-label",
-    language === "pt" ? "Switch to English" : "Mudar para português",
-  );
-  document.querySelector(".site-nav").setAttribute(
-    "aria-label",
-    language === "pt" ? "Navegação principal" : "Main navigation",
-  );
-  document.querySelector(".nav-controls").setAttribute(
-    "aria-label",
-    language === "pt" ? "Preferências do site" : "Site preferences",
-  );
-  document.querySelector(".outline-button").setAttribute(
-    "aria-label",
-    language === "pt"
-      ? "Conversar com Messyas pelo WhatsApp"
-      : "Talk to Messyas on WhatsApp",
-  );
-  copyEmailButton?.setAttribute(
-    "aria-label",
-    language === "pt" ? "Copiar endereço de e-mail" : "Copy email address",
-  );
-  document.querySelectorAll(".timeline-content ul").forEach((list) => {
-    list.setAttribute(
-      "aria-label",
-      language === "pt" ? "Tecnologias utilizadas" : "Technologies used",
-    );
-  });
-
-  applyTheme(rootElement.dataset.theme || "light");
-  if (persist) setStoredPreference("portfolio-language", language);
+  if (persist) store.set("portfolio-theme", theme);
 }
 
 themeToggle.addEventListener("click", () => {
-  applyTheme(rootElement.dataset.theme === "dark" ? "light" : "dark", true);
+  applyTheme(root.dataset.theme === "dark" ? "light" : "dark", true);
+});
+langToggle.addEventListener("click", () => {
+  applyLanguage(lang === "pt" ? "en" : "pt", true);
 });
 
-languageToggle.addEventListener("click", () => {
-  applyLanguage(currentLanguage === "pt" ? "en" : "pt", true);
-});
+applyLanguage(lang);
 
-systemTheme.addEventListener("change", (event) => {
-  if (!getStoredPreference("portfolio-theme")) {
-    applyTheme(event.matches ? "dark" : "light");
-  }
-});
+/* ---------- Relógio de Manaus ---------- */
 
-applyLanguage(currentLanguage);
+const clock = document.querySelector("#clock");
 
-const menuButton = document.querySelector(".menu-button");
-const navigation = document.querySelector(".site-nav");
-const navLinks = [...document.querySelectorAll(".site-nav a")];
+function tickClock() {
+  if (!clock) return;
+  const time = new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "America/Manaus",
+  }).format(new Date());
+  clock.textContent = `${time} AMT`;
+}
+tickClock();
+setInterval(tickClock, 15000);
 
-function closeMenu() {
-  menuButton.setAttribute("aria-expanded", "false");
-  navigation.classList.remove("open");
-  document.body.classList.remove("menu-open");
+/* ---------- Menu mobile ---------- */
+
+const menuButton = document.querySelector(".menu-btn");
+const menuLayer = document.querySelector("#menu-layer");
+
+function setMenu(open) {
+  menuButton.setAttribute("aria-expanded", String(open));
+  menuLayer.hidden = !open;
+  document.body.style.overflow = open ? "hidden" : "";
 }
 
 menuButton.addEventListener("click", () => {
-  const willOpen = menuButton.getAttribute("aria-expanded") === "false";
-
-  menuButton.setAttribute("aria-expanded", String(willOpen));
-  navigation.classList.toggle("open", willOpen);
-  document.body.classList.toggle("menu-open", willOpen);
+  setMenu(menuButton.getAttribute("aria-expanded") !== "true");
 });
-
-navLinks.forEach((link) => link.addEventListener("click", closeMenu));
-
+menuLayer.addEventListener("click", (event) => {
+  if (event.target.closest("[data-close-menu], .menu-item")) setMenu(false);
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") setMenu(false);
+});
 window.addEventListener("resize", () => {
-  if (window.innerWidth > 640) closeMenu();
+  if (window.innerWidth >= 1024) setMenu(false);
 });
 
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-const revealElements = document.querySelectorAll(".reveal");
+/* ---------- Revelar ao rolar ---------- */
 
-if (reducedMotion.matches) {
-  revealElements.forEach((element) => element.classList.add("is-visible"));
-} else {
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const revealEls = document.querySelectorAll(".reveal");
+
+if (!reduceMotion && "IntersectionObserver" in window) {
   const revealObserver = new IntersectionObserver(
     (entries, observer) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-visible");
+        entry.target.classList.add("is-in");
         observer.unobserve(entry.target);
       });
     },
-    { threshold: 0.14 },
+    { threshold: 0.08, rootMargin: "0px 0px -40px 0px" },
   );
-
-  revealElements.forEach((element) => revealObserver.observe(element));
+  revealEls.forEach((el) => {
+    el.classList.add("armed");
+    revealObserver.observe(el);
+  });
 }
 
-const pageSections = document.querySelectorAll("main section[id]");
+/* ---------- Seção ativa (nav + menu em árvore) ---------- */
 
-const sectionObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
+const sectionIds = ["topo", "projetos", "stack", "trajetoria", "contato"];
+const sectionEls = sectionIds.map((id) => document.getElementById(id));
+const navLinks = [...document.querySelectorAll(".nav-link")];
+const treeItems = [...document.querySelectorAll(".arv-item")];
+let ticking = false;
 
-      navLinks.forEach((link) => {
-        const isCurrent = link.getAttribute("href") === `#${entry.target.id}`;
-        link.classList.toggle("active", isCurrent);
+function updateActive() {
+  ticking = false;
+  const line = window.innerHeight * 0.4;
+  let current = "topo";
+  sectionEls.forEach((el, index) => {
+    if (index === 0 || !el) return;
+    if (el.getBoundingClientRect().top <= line) current = el.id;
+  });
+  // chegou ao fim da página: último item
+  if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+    current = "contato";
+  }
 
-        if (isCurrent) {
-          link.setAttribute("aria-current", "page");
-        } else {
-          link.removeAttribute("aria-current");
-        }
-      });
-    });
+  navLinks.forEach((link) => {
+    const active = link.getAttribute("href") === `#${current}`;
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "true");
+    else link.removeAttribute("aria-current");
+  });
+  treeItems.forEach((item) => {
+    item.classList.toggle("is-active", item.dataset.target === current);
+  });
+}
+
+window.addEventListener(
+  "scroll",
+  () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(updateActive);
+    }
   },
-  { rootMargin: "-45% 0px -45% 0px" },
+  { passive: true },
 );
+updateActive();
 
-pageSections.forEach((section) => sectionObserver.observe(section));
+/* ---------- Copiar e-mail ---------- */
 
 async function copyText(text) {
   if (navigator.clipboard && window.isSecureContext) {
     await navigator.clipboard.writeText(text);
     return;
   }
-
-  const temporaryField = document.createElement("textarea");
-  temporaryField.value = text;
-  temporaryField.setAttribute("readonly", "");
-  temporaryField.style.position = "fixed";
-  temporaryField.style.opacity = "0";
-  document.body.appendChild(temporaryField);
-  temporaryField.select();
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.setAttribute("readonly", "");
+  field.style.cssText = "position:fixed;opacity:0";
+  document.body.appendChild(field);
+  field.select();
   document.execCommand("copy");
-  temporaryField.remove();
+  field.remove();
 }
 
-copyEmailButton.addEventListener("click", async () => {
+copyButton?.addEventListener("click", async () => {
   try {
-    await copyText(copyEmailButton.dataset.copyEmail);
-    copyEmailButton.textContent = translations[currentLanguage].copied;
-    copyEmailButton.classList.add("copied");
+    await copyText(copyButton.dataset.copyEmail);
+    copyLabel.textContent = extra[lang].copied;
+    copyButton.classList.add("copied");
   } catch {
-    copyEmailButton.textContent = translations[currentLanguage].select;
+    copyLabel.textContent = extra[lang].select;
   }
-
-  window.setTimeout(() => {
-    copyEmailButton.textContent = translations[currentLanguage].copy;
-    copyEmailButton.classList.remove("copied");
+  setTimeout(() => {
+    copyLabel.textContent = lang === "en" ? en.copy : ptOriginal.copy;
+    copyButton.classList.remove("copied");
   }, 1800);
 });
 
-const particleCanvas = document.querySelector("#particle-field");
+/* ==========================================================================
+   Cursor jabuti em dither (quadradinhos, como o cursor do kc1t.com).
+   Um jabuti vetorial é desenhado num canvas pequeno e depois "pontilhado"
+   com uma matriz de Bayer 4x4. Anda atrás do mouse com atraso, vira para
+   onde você move, mexe as patas, cresce sobre links e recolhe a cabeça ao
+   clicar. Um ponto dither marca a posição exata do mouse.
+   ========================================================================== */
 
-if (particleCanvas && !reducedMotion.matches) {
-  const context = particleCanvas.getContext("2d", { alpha: true });
-  const particles = [];
-  const pointer = { x: 0, y: 0, active: false };
-  const maximumPixelRatio = 1.5;
-  const particleMargin = 70;
-  let viewportWidth = 0;
-  let viewportHeight = 0;
-  let targetParticleCount = 0;
-  let animationFrame;
-  let previousTime = performance.now();
+(function jabutiCursor() {
+  const finePointer =
+    !("ontouchstart" in window) &&
+    !(navigator.maxTouchPoints > 0) &&
+    !window.matchMedia("(pointer: coarse)").matches;
+  if (!finePointer || window.innerWidth < 768) return;
 
-  function createParticle(extraDelay = false) {
-    const radius = 0.65 + Math.random() * 1.15;
-    const speed = 0.38 + Math.random() * 0.58;
-    const initialDistance = extraDelay
-      ? Math.min(240, viewportWidth * 0.2)
-      : 90;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const COLOR = "#f0ece8";
 
-    return {
-      x: -particleMargin - Math.random() * initialDistance,
-      y: -particleMargin + Math.random() * (viewportHeight + particleMargin * 2),
-      vx: speed,
-      vy: -0.06 + Math.random() * 0.12,
-      radius,
-      opacity: 0.06 + Math.random() * 0.13,
-      phase: Math.random() * Math.PI * 2,
-      shape: Math.random() < 0.24 ? "square" : "trail",
-    };
+  function makeCanvas(size) {
+    const c = document.createElement("canvas");
+    c.width = c.height = size * dpr;
+    c.style.cssText =
+      `position:fixed;top:0;left:0;width:${size}px;height:${size}px;pointer-events:none;` +
+      "z-index:999999;mix-blend-mode:difference;will-change:transform;opacity:0;transition:opacity .25s";
+    c.setAttribute("aria-hidden", "true");
+    document.body.appendChild(c);
+    const ctx = c.getContext("2d");
+    ctx.scale(dpr, dpr);
+    return { c, ctx, size };
   }
 
-  function resetParticle(particle, extraDelay = false) {
-    Object.assign(particle, createParticle(extraDelay));
+  // ---- jabuti (canvas de alta resolução -> grade de 20x20 células) ----
+  const CELLS = 30, CELL = 2, SIZE = CELLS * CELL; // 60px
+  const HI = 240;
+  const hi = document.createElement("canvas");
+  hi.width = hi.height = HI;
+  const hctx = hi.getContext("2d", { willReadFrequently: true });
+  const lo = document.createElement("canvas");
+  lo.width = lo.height = CELLS;
+  const lctx = lo.getContext("2d", { willReadFrequently: true });
+
+  function ell(ctx, cx, cy, rx, ry, rot) {
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, rot || 0, 0, Math.PI * 2);
   }
 
-  function resizeParticleField() {
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, maximumPixelRatio);
-    viewportWidth = window.innerWidth;
-    viewportHeight = window.innerHeight;
-    particleCanvas.width = Math.round(viewportWidth * pixelRatio);
-    particleCanvas.height = Math.round(viewportHeight * pixelRatio);
-    particleCanvas.style.width = `${viewportWidth}px`;
-    particleCanvas.style.height = `${viewportHeight}px`;
-    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  // desenha no espaço 48x48 (cabeça para cima, centro em 24,24)
+  function drawTurtle(angle, scale, walk, head) {
+    hctx.setTransform(1, 0, 0, 1, 0, 0);
+    hctx.clearRect(0, 0, HI, HI);
+    hctx.globalCompositeOperation = "source-over";
+    hctx.translate(HI / 2, HI / 2);
+    hctx.rotate(angle);
+    hctx.scale((HI / 48) * scale, (HI / 48) * scale);
+    hctx.translate(-24, -24);
 
-    const baseParticleCount = Math.min(
-      82,
-      Math.max(34, Math.round((viewportWidth * viewportHeight) / 19000)),
-    );
-    targetParticleCount = Math.round(baseParticleCount * 1.2);
-
-    while (particles.length < targetParticleCount) {
-      particles.push(createParticle(true));
+    // patas (alternando em diagonal)
+    const sw = Math.sin(walk) * 0.45;
+    const legs = [
+      [16, 17, 9.5, 14.5, 0.63, sw],   // frente esq
+      [32, 17, 38.5, 14.5, -0.63, -sw], // frente dir
+      [16, 33, 10, 35.5, -0.56, -sw],  // trás esq
+      [32, 33, 38, 35.5, 0.56, sw],    // trás dir
+    ];
+    hctx.fillStyle = "rgba(255,255,255,.8)";
+    for (const [px, py, cx, cy, rot, a] of legs) {
+      hctx.save();
+      // ao clicar, a pata recolhe para dentro do casco (encolhe em torno do quadril)
+      const k = 1 - 0.95 * head;
+      hctx.translate(px, py);
+      hctx.rotate(a * (1 - head));
+      hctx.scale(k, k);
+      hctx.translate(-px, -py);
+      ell(hctx, cx, cy, 5.6, 3.3, rot);
+      hctx.fill();
+      hctx.restore();
     }
+    // rabinho (também recolhe)
+    hctx.save();
+    hctx.translate(24, 38);
+    hctx.scale(1 - 0.95 * head, 1 - 0.95 * head);
+    hctx.translate(-24, -38);
+    hctx.beginPath();
+    hctx.moveTo(24, 39);
+    hctx.lineTo(21, 46.5);
+    hctx.lineTo(27, 46.5);
+    hctx.closePath();
+    hctx.fill();
+    hctx.restore();
+    // cabeça (recolhe ao clicar)
+    hctx.fillStyle = "rgba(255,255,255,.95)";
+    ell(hctx, 24, 8.2 + head * 9, 4.4, 5.6 - head * 2.4);
+    hctx.fill();
+    // vão entre o casco e as patas/cabeça
+    hctx.globalCompositeOperation = "destination-out";
+    hctx.fillStyle = "#000";
+    ell(hctx, 24, 26, 15.2, 17.2);
+    hctx.fill();
+    hctx.globalCompositeOperation = "source-over";
+    // casco
+    hctx.fillStyle = "#fff";
+    ell(hctx, 24, 26, 13.4, 15.4);
+    hctx.fill();
+    // escudos: linhas "apagam" parte da trama para desenhar o hexágono
+    hctx.globalCompositeOperation = "destination-out";
+    hctx.strokeStyle = "rgba(0,0,0,.9)";
+    hctx.lineWidth = 1.5;
+    hctx.lineJoin = hctx.lineCap = "round";
+    hctx.beginPath();
+    hctx.moveTo(24, 19.6); hctx.lineTo(29.3, 22.7); hctx.lineTo(29.3, 28.9);
+    hctx.lineTo(24, 32); hctx.lineTo(18.7, 28.9); hctx.lineTo(18.7, 22.7); hctx.closePath();
+    hctx.moveTo(24, 19.6); hctx.lineTo(24, 13.4);
+    hctx.moveTo(29.3, 22.7); hctx.lineTo(34.8, 19.6);
+    hctx.moveTo(29.3, 28.9); hctx.lineTo(34.8, 32.2);
+    hctx.moveTo(24, 32); hctx.lineTo(24, 38.6);
+    hctx.moveTo(18.7, 28.9); hctx.lineTo(13.2, 32.2);
+    hctx.moveTo(18.7, 22.7); hctx.lineTo(13.2, 19.6);
+    hctx.stroke();
+    hctx.setTransform(1, 0, 0, 1, 0, 0);
+    hctx.globalCompositeOperation = "source-over";
 
-    if (particles.length > targetParticleCount) {
-      particles.length = targetParticleCount;
-    }
+    // reduz para a grade de células e lê a densidade
+    lctx.clearRect(0, 0, CELLS, CELLS);
+    lctx.imageSmoothingEnabled = true;
+    lctx.imageSmoothingQuality = "high";
+    lctx.drawImage(hi, 0, 0, CELLS, CELLS);
+    return lctx.getImageData(0, 0, CELLS, CELLS).data;
   }
 
-  function updatePointer(event) {
-    pointer.x = event.clientX;
-    pointer.y = event.clientY;
-    pointer.active = true;
-  }
+  const WAVE_SPEED = 0.4; // 1 = velocidade do original; menor = oscilação mais lenta
 
-  window.addEventListener("pointermove", updatePointer, { passive: true });
-  window.addEventListener("pointerdown", updatePointer, { passive: true });
-  window.addEventListener(
-    "pointerup",
-    () => {
-      if (matchMedia("(hover: none)").matches) pointer.active = false;
-    },
-    { passive: true },
-  );
-  document.documentElement.addEventListener("mouseleave", () => {
-    pointer.active = false;
-  });
-
-  function drawParticleField(currentTime) {
-    const elapsed = Math.min((currentTime - previousTime) / 16.667, 2);
-    previousTime = currentTime;
-    context.clearRect(0, 0, viewportWidth, viewportHeight);
-
-    for (let index = 0; index < particles.length; index += 1) {
-      const particle = particles[index];
-
-      if (pointer.active) {
-        const distanceX = pointer.x - particle.x;
-        const distanceY = pointer.y - particle.y;
-        const distanceSquared = distanceX * distanceX + distanceY * distanceY;
-        const influenceRadius = 380;
-
-        if (distanceSquared < influenceRadius * influenceRadius && distanceSquared > 1) {
-          const distance = Math.sqrt(distanceSquared);
-          const gravity = Math.min(0.052, 820 / (distanceSquared + 10000));
-          particle.vx += (distanceX / distance) * gravity * elapsed;
-          particle.vy += (distanceY / distance) * gravity * elapsed;
+  // Como no cursor original: o valor de cada célula varia com o tempo, então
+  // os quadradinhos mudam de brilho (alpha) e surgem/somem ao cruzar o limiar
+  // da matriz de Bayer. Uma onda gira em volta do jabuti, outra sai do centro
+  // e cada célula tem um cintilar próprio.
+  function paintTurtle(ctx, data, time) {
+    const t = time * WAVE_SPEED;
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    ctx.fillStyle = COLOR;
+    const mid = (CELLS - 1) / 2;
+    for (let y = 0; y < CELLS; y++) {
+      for (let x = 0; x < CELLS; x++) {
+        const base = data[(y * CELLS + x) * 4 + 3] / 255;
+        if (base < 0.05) continue;
+        const dx = x - mid, dy = y - mid;
+        const r = Math.hypot(dx, dy);
+        const ang = Math.atan2(dy, dx);
+        const wave =
+          0.13 * Math.sin(3 * ang - 2.2 * t) +
+          0.1 * Math.sin(3.1 * t - 0.55 * r) +
+          0.07 * Math.sin(2.3 * t + ((x * 12.9898 + y * 78.233) % 6.283));
+        const v = base * (0.86 + wave) + 0.04 * wave;
+        if (v > 0 && v > BAYER[y % 4][x % 4] / 16) {
+          ctx.globalAlpha = Math.min(1, v);
+          ctx.fillRect(x * CELL, y * CELL, CELL - 0.5, CELL - 0.5);
         }
       }
-
-      particle.vx += (0.62 - particle.vx) * 0.0025 * elapsed;
-      particle.vy += Math.sin(currentTime * 0.00045 + particle.phase) * 0.0008 * elapsed;
-
-      const currentSpeed = Math.hypot(particle.vx, particle.vy);
-      if (currentSpeed > 2.1) {
-        particle.vx = (particle.vx / currentSpeed) * 2.1;
-        particle.vy = (particle.vy / currentSpeed) * 2.1;
-      }
-
-      particle.x += particle.vx * elapsed;
-      particle.y += particle.vy * elapsed;
-
-      if (
-        particle.x > viewportWidth + particleMargin ||
-        particle.y < -particleMargin * 1.5 ||
-        particle.y > viewportHeight + particleMargin * 1.5
-      ) {
-        resetParticle(particle);
-        continue;
-      }
-
-      const horizontalFade = Math.min(
-        1,
-        Math.max(0, (particle.x + particleMargin) / 90),
-        Math.max(0, (viewportWidth + particleMargin - particle.x) / 90),
-      );
-
-      const trailLength = 3 + Math.min(8, currentSpeed * 5);
-      const directionX = particle.vx / Math.max(currentSpeed, 0.01);
-      const directionY = particle.vy / Math.max(currentSpeed, 0.01);
-
-      const particleRgb =
-        rootElement.dataset.theme === "dark" ? "205, 205, 198" : "60, 60, 57";
-      const particleColor = `rgba(${particleRgb}, ${particle.opacity * horizontalFade})`;
-
-      if (particle.shape === "square") {
-        const squareSize = particle.radius * 1.8;
-        context.fillStyle = particleColor;
-        context.fillRect(
-          particle.x - squareSize / 2,
-          particle.y - squareSize / 2,
-          squareSize,
-          squareSize,
-        );
-      } else {
-        context.beginPath();
-        context.moveTo(
-          particle.x - directionX * trailLength,
-          particle.y - directionY * trailLength,
-        );
-        context.lineTo(particle.x, particle.y);
-        context.lineWidth = particle.radius;
-        context.lineCap = "round";
-        context.strokeStyle = particleColor;
-        context.stroke();
-      }
     }
-
-    animationFrame = requestAnimationFrame(drawParticleField);
+    ctx.globalAlpha = 1;
   }
 
-  let resizeFrame;
-  window.addEventListener(
-    "resize",
-    () => {
-      cancelAnimationFrame(resizeFrame);
-      resizeFrame = requestAnimationFrame(resizeParticleField);
-    },
-    { passive: true },
-  );
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      cancelAnimationFrame(animationFrame);
-    } else {
-      previousTime = performance.now();
-      animationFrame = requestAnimationFrame(drawParticleField);
+  // ---- ponto exato do mouse ----
+  function paintDot(ctx, size, cell, radius, t) {
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = COLOR;
+    const c = size / 2;
+    for (let y = 0; y < size; y += cell) {
+      for (let x = 0; x < size; x += cell) {
+        const r = Math.hypot(x + cell / 2 - c, y + cell / 2 - c) / radius;
+        const v = 1.05 - 0.55 * r + 0.16 * Math.sin(3.1 * t - 4 * r);
+        if (v > 0 && v > BAYER[(y / cell) % 4][(x / cell) % 4] / 16) {
+          ctx.globalAlpha = Math.min(1, v);
+          ctx.fillRect(x, y, cell - 1, cell - 1);
+        }
+      }
     }
+    ctx.globalAlpha = 1;
+  }
+
+  const body = makeCanvas(SIZE);
+  const dot = makeCanvas(10);
+  root.classList.add("has-cursor");
+
+  const state = {
+    mx: -999, my: -999, x: -999, y: -999,
+    angle: -Math.PI / 4, shown: false,
+    over: 0, target: 0, press: 0, pressT: 0, walk: 0, walkAmp: 0, t: 0,
+  };
+
+  document.addEventListener("mousemove", (e) => {
+    if (!state.shown) {
+      state.x = state.mx = e.clientX;
+      state.y = state.my = e.clientY;
+      state.shown = true;
+      body.c.style.opacity = dot.c.style.opacity = "1";
+    }
+    state.mx = e.clientX;
+    state.my = e.clientY;
+    state.target = e.target.closest?.("a, button, [role='button']") ? 1 : 0;
+  });
+  document.addEventListener("mousedown", () => (state.pressT = 1));
+  document.addEventListener("mouseup", () => (state.pressT = 0));
+  root.addEventListener("mouseleave", () => {
+    state.shown = false;
+    body.c.style.opacity = dot.c.style.opacity = "0";
   });
 
-  resizeParticleField();
-  animationFrame = requestAnimationFrame(drawParticleField);
-}
+  const TAU = Math.PI * 2;
+  let lastDot = -1;
+  function frame() {
+    state.t += 0.045;
+    const dx = (state.mx - state.x) * 0.16;
+    const dy = (state.my - state.y) * 0.16;
+    state.x += dx;
+    state.y += dy;
+    const speed = Math.hypot(dx, dy);
+
+    if (speed > 0.6) {
+      const target = Math.atan2(dy, dx) + Math.PI / 2;
+      let diff = (target - state.angle) % TAU;
+      if (diff > Math.PI) diff -= TAU;
+      if (diff < -Math.PI) diff += TAU;
+      state.angle += diff * 0.18;
+    }
+    state.over += (state.target - state.over) * 0.12;
+    state.press += (state.pressT - state.press) * 0.25;
+    state.walkAmp += ((speed > 0.5 && !reduce ? 1 : 0) - state.walkAmp) * 0.2;
+    state.walk += 0.28 * state.walkAmp;
+
+    const scale = 0.85 * (1 + 0.25 * state.over) * (1 - 0.1 * state.press);
+    const data = drawTurtle(state.angle, scale, state.walk, state.press);
+    paintTurtle(body.ctx, data, reduce ? 0 : state.t);
+    body.c.style.transform = `translate3d(${state.x - SIZE / 2}px, ${state.y - SIZE / 2}px, 0)`;
+
+    const dotR = 4 * (1 - 0.45 * state.over);
+    if (!reduce || dotR !== lastDot) {
+      paintDot(dot.ctx, 10, 2, dotR, reduce ? 0 : state.t);
+      lastDot = dotR;
+    }
+    dot.c.style.transform = `translate3d(${state.mx - 5}px, ${state.my - 5}px, 0)`;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
