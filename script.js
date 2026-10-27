@@ -82,6 +82,9 @@ const en = {
   f1Date: "2026 - current",
   f2Title: "Macroplastics detection with a deep learning ensemble",
   f2Type: "Paper presented",
+  g1Title: "Systems Analysis and Development",
+  g1Type: "Bachelor's degree",
+  g1Date: "Graduated",
 
   contactLead: "Open to conversations about intelligent agents, automation and AI projects.",
   copy: "Copy email",
