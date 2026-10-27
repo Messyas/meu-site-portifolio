@@ -1358,6 +1358,27 @@ html[data-theme="light"] .icon-moon {
   font-family: var(--mono);
   font-size: 8px;
 }
+.org-logo {
+  width: 28px;
+  height: 28px;
+  overflow: hidden;
+  border-color: rgb(255 255 255 / 14%);
+  background: #fff;
+  transition:
+    transform 0.25s var(--ease-out),
+    box-shadow 0.25s var(--ease-out);
+}
+.org-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+a.org-logo:hover,
+a.org-logo:focus-visible {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 12%);
+}
 .org-name {
   color: var(--primary);
   font-size: 15px;
