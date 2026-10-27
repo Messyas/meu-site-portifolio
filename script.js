@@ -40,7 +40,7 @@ const en = {
   role: "Fullstack Dev · Intelligent Agents &amp; Automation",
   base: "Base",
   localTime: "Local time",
-  bio: 'Fullstack dev in <a class="elo" href="#trajetoria">Manaus</a>, building intelligent agents and automation. I\'m currently on an LG project focused on automation and AI agents, and I study hyperautomation at <a class="elo" href="#trajetoria">AX Academy</a>. Before that, I was Scrum Master for <a class="elo" href="#projetos">MotoMatch</a> at <a class="elo" href="#trajetoria">Web Academy</a> (UFAM × Motorola) and presented a paper at <a class="elo" href="#trajetoria">CBIC 2025</a>. I build systems that solve real problems, from a gate that reads license plates to a phone recommender and agents that automate work.',
+  bio: 'Fullstack dev in <a class="elo" href="#trajetoria">Manaus</a>, building intelligent agents and automation. I\'m currently on an LG project focused on automation and AI agents, and I study hyperautomation at <a class="elo" href="#trajetoria">AX Academy</a>. Before that, I was Scrum Master for <a class="elo" href="#projetos">MotoMatch</a> at <a class="elo" href="#trajetoria">Web Academy</a> (UFAM × Motorola) and presented a paper at <a class="elo" href="#trajetoria">CBIC 2025</a>.',
 
   projectsTitle: "What I build",
   p1Desc:
