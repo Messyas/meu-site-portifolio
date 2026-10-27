@@ -442,11 +442,14 @@ copyButton?.addEventListener("click", async () => {
     return lctx.getImageData(0, 0, CELLS, CELLS).data;
   }
 
+  const WAVE_SPEED = 0.4; // 1 = velocidade do original; menor = oscilação mais lenta
+
   // Como no cursor original: o valor de cada célula varia com o tempo, então
   // os quadradinhos mudam de brilho (alpha) e surgem/somem ao cruzar o limiar
   // da matriz de Bayer. Uma onda gira em volta do jabuti, outra sai do centro
   // e cada célula tem um cintilar próprio.
-  function paintTurtle(ctx, data, t) {
+  function paintTurtle(ctx, data, time) {
+    const t = time * WAVE_SPEED;
     ctx.clearRect(0, 0, SIZE, SIZE);
     ctx.fillStyle = COLOR;
     const mid = (CELLS - 1) / 2;
