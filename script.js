@@ -388,20 +388,28 @@ copyButton?.addEventListener("click", async () => {
     hctx.fillStyle = "rgba(255,255,255,.8)";
     for (const [px, py, cx, cy, rot, a] of legs) {
       hctx.save();
+      // ao clicar, a pata recolhe para dentro do casco (encolhe em torno do quadril)
+      const k = 1 - 0.95 * head;
       hctx.translate(px, py);
-      hctx.rotate(a);
+      hctx.rotate(a * (1 - head));
+      hctx.scale(k, k);
       hctx.translate(-px, -py);
       ell(hctx, cx, cy, 5.6, 3.3, rot);
       hctx.fill();
       hctx.restore();
     }
-    // rabinho
+    // rabinho (também recolhe)
+    hctx.save();
+    hctx.translate(24, 38);
+    hctx.scale(1 - 0.95 * head, 1 - 0.95 * head);
+    hctx.translate(-24, -38);
     hctx.beginPath();
     hctx.moveTo(24, 39);
     hctx.lineTo(21, 46.5);
     hctx.lineTo(27, 46.5);
     hctx.closePath();
     hctx.fill();
+    hctx.restore();
     // cabeça (recolhe ao clicar)
     hctx.fillStyle = "rgba(255,255,255,.95)";
     ell(hctx, 24, 8.2 + head * 9, 4.4, 5.6 - head * 2.4);
