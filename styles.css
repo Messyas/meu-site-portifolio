@@ -1358,11 +1358,10 @@ html[data-theme="light"] .icon-moon {
   font-size: 8px;
 }
 .org-logo {
-  width: 28px;
-  height: 28px;
+  width: 24px; /* mesmo tamanho do original (h-6 w-6) */
+  height: 24px;
   overflow: hidden;
-  border-color: rgb(255 255 255 / 14%);
-  background: #fff;
+  background: #fff; /* logos escuros precisam de fundo claro */
   transition:
     transform 0.25s var(--ease-out),
     box-shadow 0.25s var(--ease-out);
@@ -1375,8 +1374,8 @@ html[data-theme="light"] .icon-moon {
 }
 a.org-logo:hover,
 a.org-logo:focus-visible {
-  transform: scale(1.12);
-  box-shadow: 0 0 0 3px rgb(255 255 255 / 12%);
+  transform: scale(1.1);
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 10%);
 }
 .org-name {
   color: var(--primary);
