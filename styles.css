@@ -1244,7 +1244,7 @@ html[data-theme="light"] .icon-moon {
   display: flex;
   overflow: hidden;
   gap: var(--gap);
-  padding: 22px 0;
+  padding: 24px 0;
   user-select: none;
   -webkit-mask-image: linear-gradient(90deg, transparent, #fff 8%, #fff 92%, transparent);
   mask-image: linear-gradient(90deg, transparent, #fff 8%, #fff 92%, transparent);
@@ -1259,15 +1259,21 @@ html[data-theme="light"] .icon-moon {
   animation: marquee var(--duration) linear infinite;
 }
 .marquee-group li {
-  padding: 6px 14px;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: var(--card);
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
   color: var(--secondary);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 24px;
   white-space: nowrap;
+}
+.mk-ico {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  fill: currentColor;
 }
 @keyframes marquee {
   from { transform: translateX(0); }
