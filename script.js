@@ -82,6 +82,8 @@ const en = {
   f1Date: "2026 - current",
   f2Title: "Macroplastics detection with a deep learning ensemble",
   f2Type: "Paper presented",
+  newTab: "Opens in a new tab",
+  current: "Current",
   g1Title: "Systems Analysis and Development",
   g1Type: "Bachelor's degree",
   g1Date: "Graduated",
@@ -119,6 +121,11 @@ const extra = {
     nav: "Main navigation",
   },
 };
+
+// links que abrem em nova aba: avisa leitores de tela (descrição única e traduzível)
+document.querySelectorAll('a[target="_blank"]').forEach((a) => {
+  a.setAttribute("aria-describedby", "newtab-hint");
+});
 
 // guarda o texto original (português) de cada elemento traduzível
 const i18nNodes = [...document.querySelectorAll("[data-i18n]")];
@@ -206,20 +213,42 @@ setInterval(tickClock, 15000);
 const menuButton = document.querySelector(".menu-btn");
 const menuLayer = document.querySelector("#menu-layer");
 
-function setMenu(open) {
+function setMenu(open, { restoreFocus = true } = {}) {
+  const wasOpen = !menuLayer.hidden;
   menuButton.setAttribute("aria-expanded", String(open));
   menuLayer.hidden = !open;
   document.body.style.overflow = open ? "hidden" : "";
+  if (open && !wasOpen) menuLayer.querySelector(".menu-item")?.focus();
+  if (!open && wasOpen && restoreFocus) menuButton.focus();
 }
 
 menuButton.addEventListener("click", () => {
   setMenu(menuButton.getAttribute("aria-expanded") !== "true");
 });
 menuLayer.addEventListener("click", (event) => {
-  if (event.target.closest("[data-close-menu], .menu-item")) setMenu(false);
+  // ao escolher um item, o foco vai para a seção (não volta para o botão)
+  if (event.target.closest(".menu-item")) setMenu(false, { restoreFocus: false });
+  else if (event.target.closest("[data-close-menu]")) setMenu(false);
 });
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") setMenu(false);
+  if (menuLayer.hidden) return;
+  if (event.key === "Escape") {
+    setMenu(false);
+    return;
+  }
+  // mantém o Tab dentro do menu enquanto ele está aberto
+  if (event.key === "Tab") {
+    const items = [menuButton, ...menuLayer.querySelectorAll(".menu-item")];
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
 });
 window.addEventListener("resize", () => {
   if (window.innerWidth >= 1024) setMenu(false);
@@ -275,7 +304,10 @@ function updateActive() {
     else link.removeAttribute("aria-current");
   });
   treeItems.forEach((item) => {
-    item.classList.toggle("is-active", item.dataset.target === current);
+    const on = item.dataset.target === current;
+    item.classList.toggle("is-active", on);
+    if (on) item.setAttribute("aria-current", "true");
+    else item.removeAttribute("aria-current");
   });
 }
 
@@ -308,11 +340,20 @@ async function copyText(text) {
   field.remove();
 }
 
+function announce(message) {
+  const live = document.querySelector("#live");
+  if (!live) return;
+  live.textContent = "";
+  setTimeout(() => (live.textContent = message), 50);
+  setTimeout(() => (live.textContent = ""), 3000);
+}
+
 copyButton?.addEventListener("click", async () => {
   try {
     await copyText(copyButton.dataset.copyEmail);
     copyLabel.textContent = extra[lang].copied;
     copyButton.classList.add("copied");
+    announce(lang === "en" ? "Email copied to clipboard" : "E-mail copiado para a área de transferência");
   } catch {
     copyLabel.textContent = extra[lang].select;
   }

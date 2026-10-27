@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://messyas.github.io/meu-site-portifolio/sitemap.xml
