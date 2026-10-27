@@ -37,10 +37,10 @@ const en = {
   navContact: "Contact",
   treeHome: "Home",
   ctaTalk: "Contact",
-  role: "Fullstack Dev · AI &amp; Computer Vision",
+  role: "Fullstack Dev · Intelligent Agents &amp; Automation",
   base: "Base",
   localTime: "Local time",
-  bio: 'Fullstack dev in <a class="elo" href="#trajetoria">Manaus</a>, working with web, AI and computer vision. I led the Scrum team behind <a class="elo" href="#projetos">MotoMatch</a> at <a class="elo" href="#trajetoria">Web Academy</a> (UFAM × Motorola), presented a paper at <a class="elo" href="#trajetoria">CBIC 2025</a> and I\'m now studying hyperautomation and agents at <a class="elo" href="#trajetoria">AX Academy</a>. I build systems that solve real problems, from a gate that reads license plates to a phone recommender.',
+  bio: 'Fullstack dev in <a class="elo" href="#trajetoria">Manaus</a>, building intelligent agents and automation. I\'m currently on an LG project focused on automation and AI agents, and I study hyperautomation at <a class="elo" href="#trajetoria">AX Academy</a>. Before that, I led the Scrum team behind <a class="elo" href="#projetos">MotoMatch</a> at <a class="elo" href="#trajetoria">Web Academy</a> (UFAM × Motorola) and presented a paper at <a class="elo" href="#trajetoria">CBIC 2025</a>. I build systems that solve real problems, from a gate that reads license plates to a phone recommender and agents that automate work.',
 
   projectsTitle: "What I build",
   p1Desc:
@@ -83,7 +83,7 @@ const en = {
   f2Title: "Macroplastics detection with a deep learning ensemble",
   f2Type: "Paper presented",
 
-  contactLead: "Open to conversations about projects, AI and computer vision.",
+  contactLead: "Open to conversations about intelligent agents, automation and AI projects.",
   copy: "Copy email",
   backToTop: "Back to top",
 };
@@ -94,7 +94,7 @@ const extra = {
     select: "Selecione",
     title: "Messyas Gois França — Dev Fullstack",
     description:
-      "Portfólio de Messyas Gois França, dev fullstack em Manaus: web, IA e visão computacional.",
+      "Portfólio de Messyas Gois França, dev fullstack em Manaus: agentes inteligentes, automação e IA.",
     htmlLang: "pt-BR",
     flag: "🇺🇸",
     flagTitle: "English",
@@ -107,7 +107,7 @@ const extra = {
     select: "Select",
     title: "Messyas Gois França — Fullstack Dev",
     description:
-      "Portfolio of Messyas Gois França, fullstack dev in Manaus: web, AI and computer vision.",
+      "Portfolio of Messyas Gois França, fullstack dev in Manaus: intelligent agents, automation and AI.",
     htmlLang: "en",
     flag: "🇧🇷",
     flagTitle: "Português",
