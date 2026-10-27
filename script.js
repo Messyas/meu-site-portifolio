@@ -40,11 +40,11 @@ const en = {
   role: "Fullstack Dev · Intelligent Agents &amp; Automation",
   base: "Base",
   localTime: "Local time",
-  bio: 'Fullstack dev in <a class="elo" href="#trajetoria">Manaus</a>, building intelligent agents and automation. I\'m currently on an LG project focused on automation and AI agents, and I study hyperautomation at <a class="elo" href="#trajetoria">AX Academy</a>. Before that, I led the Scrum team behind <a class="elo" href="#projetos">MotoMatch</a> at <a class="elo" href="#trajetoria">Web Academy</a> (UFAM × Motorola) and presented a paper at <a class="elo" href="#trajetoria">CBIC 2025</a>. I build systems that solve real problems, from a gate that reads license plates to a phone recommender and agents that automate work.',
+  bio: 'Fullstack dev in <a class="elo" href="#trajetoria">Manaus</a>, building intelligent agents and automation. I\'m currently on an LG project focused on automation and AI agents, and I study hyperautomation at <a class="elo" href="#trajetoria">AX Academy</a>. Before that, I was Scrum Master for <a class="elo" href="#projetos">MotoMatch</a> at <a class="elo" href="#trajetoria">Web Academy</a> (UFAM × Motorola) and presented a paper at <a class="elo" href="#trajetoria">CBIC 2025</a>. I build systems that solve real problems, from a gate that reads license plates to a phone recommender and agents that automate work.',
 
   projectsTitle: "What I build",
   p1Desc:
-    "A platform (QualCel AI) that analyzes real e-commerce reviews to extract sentiment and, from a priorities quiz, recommends the ideal Motorola smartphone. I led the Scrum team.",
+    "A platform (QualCel AI) that analyzes real e-commerce reviews to extract sentiment and, from a priorities quiz, recommends the ideal Motorola smartphone. I was the Scrum Master.",
   p2Desc:
     "A 2D adventure RPG for Android, built in the Mobile 2D Game Prototyping course of Projeto Aranouá (IFAM). Cute, relaxing atmosphere: a duo of adventurers explores forests and fights monsters.",
   alsoBuilt: "Also built",
@@ -70,7 +70,7 @@ const en = {
   pathTitle: "Path",
   colExp: "Experience",
   colEdu: "Education &amp; research",
-  e1Title: "Full Stack · Scrum team lead",
+  e1Title: "Full Stack · Scrum Master",
   e1Type: "R&amp;D project",
   e2Title: "Intelligent vehicle access control",
   e2Type: "Project",
