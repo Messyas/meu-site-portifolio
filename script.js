@@ -442,14 +442,28 @@ copyButton?.addEventListener("click", async () => {
     return lctx.getImageData(0, 0, CELLS, CELLS).data;
   }
 
-  function paintTurtle(ctx, data) {
+  // Como no cursor original: o valor de cada célula varia com o tempo, então
+  // os quadradinhos mudam de brilho (alpha) e surgem/somem ao cruzar o limiar
+  // da matriz de Bayer. Uma onda gira em volta do jabuti, outra sai do centro
+  // e cada célula tem um cintilar próprio.
+  function paintTurtle(ctx, data, t) {
     ctx.clearRect(0, 0, SIZE, SIZE);
     ctx.fillStyle = COLOR;
+    const mid = (CELLS - 1) / 2;
     for (let y = 0; y < CELLS; y++) {
       for (let x = 0; x < CELLS; x++) {
-        const v = data[(y * CELLS + x) * 4 + 3] / 255;
-        if (v > 0.06 && v > BAYER[y % 4][x % 4] / 16) {
-          ctx.globalAlpha = Math.min(1, v + 0.15);
+        const base = data[(y * CELLS + x) * 4 + 3] / 255;
+        if (base < 0.05) continue;
+        const dx = x - mid, dy = y - mid;
+        const r = Math.hypot(dx, dy);
+        const ang = Math.atan2(dy, dx);
+        const wave =
+          0.13 * Math.sin(3 * ang - 2.2 * t) +
+          0.1 * Math.sin(3.1 * t - 0.55 * r) +
+          0.07 * Math.sin(2.3 * t + ((x * 12.9898 + y * 78.233) % 6.283));
+        const v = base * (0.86 + wave) + 0.04 * wave;
+        if (v > 0 && v > BAYER[y % 4][x % 4] / 16) {
+          ctx.globalAlpha = Math.min(1, v);
           ctx.fillRect(x * CELL, y * CELL, CELL - 0.5, CELL - 0.5);
         }
       }
@@ -458,14 +472,14 @@ copyButton?.addEventListener("click", async () => {
   }
 
   // ---- ponto exato do mouse ----
-  function paintDot(ctx, size, cell, radius) {
+  function paintDot(ctx, size, cell, radius, t) {
     ctx.clearRect(0, 0, size, size);
     ctx.fillStyle = COLOR;
     const c = size / 2;
     for (let y = 0; y < size; y += cell) {
       for (let x = 0; x < size; x += cell) {
         const r = Math.hypot(x + cell / 2 - c, y + cell / 2 - c) / radius;
-        const v = 1.05 - 0.55 * r;
+        const v = 1.05 - 0.55 * r + 0.16 * Math.sin(3.1 * t - 4 * r);
         if (v > 0 && v > BAYER[(y / cell) % 4][(x / cell) % 4] / 16) {
           ctx.globalAlpha = Math.min(1, v);
           ctx.fillRect(x, y, cell - 1, cell - 1);
@@ -527,12 +541,12 @@ copyButton?.addEventListener("click", async () => {
 
     const scale = 0.85 * (1 + 0.25 * state.over) * (1 - 0.1 * state.press);
     const data = drawTurtle(state.angle, scale, state.walk, state.press);
-    paintTurtle(body.ctx, data);
+    paintTurtle(body.ctx, data, reduce ? 0 : state.t);
     body.c.style.transform = `translate3d(${state.x - SIZE / 2}px, ${state.y - SIZE / 2}px, 0)`;
 
-    const dotR = Math.round(4 * (1 - 0.45 * state.over) * 10) / 10;
-    if (dotR !== lastDot) {
-      paintDot(dot.ctx, 10, 2, dotR);
+    const dotR = 4 * (1 - 0.45 * state.over);
+    if (!reduce || dotR !== lastDot) {
+      paintDot(dot.ctx, 10, 2, dotR, reduce ? 0 : state.t);
       lastDot = dotR;
     }
     dot.c.style.transform = `translate3d(${state.mx - 5}px, ${state.my - 5}px, 0)`;
