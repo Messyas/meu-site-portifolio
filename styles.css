@@ -1662,6 +1662,93 @@ html[data-theme="light"] .icon-moon {
   color: var(--primary);
 }
 
+/* ---------- Cursor jabuti (SVG) ---------- */
+
+.jabuti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999999;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  will-change: transform;
+  transition: opacity 0.25s;
+}
+.jabuti.visible {
+  opacity: 1;
+}
+.jabuti-inner {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s var(--ease-out);
+}
+.jabuti.over .jabuti-inner {
+  transform: scale(1.35);
+}
+.jabuti.pressed .jabuti-inner {
+  transform: scale(0.88);
+}
+.jabuti svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: #f0ece8;
+}
+.jabuti .shell {
+  stroke: #000;
+  stroke-width: 1.3;
+}
+.jabuti .scutes {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jabuti .scutes ellipse {
+  stroke-width: 0.8;
+}
+.jabuti .eye {
+  fill: #000;
+}
+.jabuti .head {
+  transition: transform 0.25s var(--ease-out);
+}
+.jabuti.pressed .head {
+  transform: translateY(8px) scale(0.55);
+}
+.jabuti .leg {
+  animation: jabuti-paddle 0.34s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+.jabuti .leg.fr,
+.jabuti .leg.bl {
+  animation-direction: alternate-reverse;
+}
+.jabuti.moving .leg {
+  animation-play-state: running;
+}
+.jabuti.moving .head {
+  animation: jabuti-bob 0.68s ease-in-out infinite;
+}
+@keyframes jabuti-paddle {
+  from { transform: rotate(-16deg); }
+  to { transform: rotate(16deg); }
+}
+@keyframes jabuti-bob {
+  50% { transform: translateY(-1.2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jabuti .leg,
+  .jabuti.moving .head {
+    animation: none;
+  }
+}
+
 /* ---------- Movimento reduzido ---------- */
 
 @media (prefers-reduced-motion: reduce) {

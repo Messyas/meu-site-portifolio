@@ -320,117 +320,104 @@ copyButton?.addEventListener("click", async () => {
 });
 
 /* ==========================================================================
-   Cursor em canvas com dither ordenado (matriz de Bayer 4×4).
-   Um anel de 40px segue o mouse com atraso e um ponto de 10px o acompanha na
-   hora; ambos usam mix-blend-mode: difference e crescem sobre links/botões.
-   Só liga em telas largas com mouse (nada de touch).
+   Cursor vetorial em forma de jabuti (SVG).
+   Segue o mouse com um pouco de atraso, vira a cabeça para onde você move,
+   mexe as patas enquanto anda, cresce sobre links/botões e esconde a cabeça
+   no casco quando você clica. Só liga em telas largas com mouse.
    ========================================================================== */
 
-(function ditherCursor() {
+(function jabutiCursor() {
   const finePointer =
     !("ontouchstart" in window) &&
     !(navigator.maxTouchPoints > 0) &&
     !window.matchMedia("(pointer: coarse)").matches;
   if (!finePointer || window.innerWidth < 768) return;
 
-  const BAYER = [
-    [0, 8, 2, 10],
-    [12, 4, 14, 6],
-    [3, 11, 1, 9],
-    [15, 7, 13, 5],
-  ];
-
-  function makeCanvas(size) {
-    const canvas = document.createElement("canvas");
-    canvas.setAttribute("aria-hidden", "true");
-    Object.assign(canvas.style, {
-      position: "fixed",
-      top: "0",
-      left: "0",
-      width: `${size}px`,
-      height: `${size}px`,
-      pointerEvents: "none",
-      zIndex: "999999",
-      mixBlendMode: "difference",
-      willChange: "transform",
-      transform: "translate3d(-999px, -999px, 0)",
-    });
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = size * ratio;
-    canvas.height = size * ratio;
-    ctx.scale(ratio, ratio);
-    ctx.fillStyle = "#f0ece8";
-    document.body.appendChild(canvas);
-    return { canvas, ctx };
-  }
-
-  // pinta uma grade de células, ligando só as que passam no limiar de Bayer
-  function paint(ctx, size, cell, shade) {
-    ctx.clearRect(0, 0, size, size);
-    const half = size / 2;
-    for (let y = 0; y < size; y += cell) {
-      for (let x = 0; x < size; x += cell) {
-        const dx = x + cell / 2 - half;
-        const dy = y + cell / 2 - half;
-        const value = shade(Math.hypot(dx, dy), Math.atan2(dy, dx));
-        if (value <= 0) continue;
-        if (value <= BAYER[(y / cell) % 4][(x / cell) % 4] / 16) continue;
-        ctx.globalAlpha = Math.min(1, value);
-        ctx.fillRect(x, y, cell - 1, cell - 1);
-      }
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  const ring = makeCanvas(40);
-  const dot = makeCanvas(10);
-  if (!ring || !dot) return;
+  const cursor = document.createElement("div");
+  cursor.className = "jabuti";
+  cursor.setAttribute("aria-hidden", "true");
+  cursor.innerHTML = `
+    <div class="jabuti-inner">
+      <svg viewBox="0 0 48 48" focusable="false">
+        <path class="tail" d="M24 39.5 21.4 46.2Q24 44.4 26.6 46.2Z" />
+        <g class="leg bl" style="transform-origin: 16px 33px">
+          <ellipse cx="10" cy="35.5" rx="5.2" ry="3" transform="rotate(-32 10 35.5)" />
+        </g>
+        <g class="leg br" style="transform-origin: 32px 33px">
+          <ellipse cx="38" cy="35.5" rx="5.2" ry="3" transform="rotate(32 38 35.5)" />
+        </g>
+        <g class="leg fl" style="transform-origin: 16px 17px">
+          <ellipse cx="9.5" cy="14.5" rx="5.2" ry="3" transform="rotate(36 9.5 14.5)" />
+        </g>
+        <g class="leg fr" style="transform-origin: 32px 17px">
+          <ellipse cx="38.5" cy="14.5" rx="5.2" ry="3" transform="rotate(-36 38.5 14.5)" />
+        </g>
+        <g class="head" style="transform-origin: 24px 15px">
+          <ellipse cx="24" cy="8.2" rx="4.1" ry="5.3" />
+          <circle class="eye" cx="22.3" cy="6.9" r="0.85" />
+          <circle class="eye" cx="25.7" cy="6.9" r="0.85" />
+        </g>
+        <ellipse class="shell" cx="24" cy="26" rx="13" ry="15" />
+        <g class="scutes">
+          <ellipse cx="24" cy="26" rx="10.6" ry="12.6" />
+          <path d="M24 19.6 29.3 22.7V28.9L24 32 18.7 28.9V22.7Z" />
+          <path d="M24 19.6V13.6M29.3 22.7 34.6 19.8M29.3 28.9 34.6 32.2M24 32V38.4M18.7 28.9 13.4 32.2M18.7 22.7 13.4 19.8" />
+        </g>
+      </svg>
+    </div>`;
+  document.body.appendChild(cursor);
   root.classList.add("has-cursor");
 
-  const state = { mx: -999, my: -999, x: -999, y: -999, t: 0, over: 0, target: 0 };
+  // começa olhando para o canto superior esquerdo, como uma seta
+  const state = {
+    mx: -999, my: -999, x: -999, y: -999,
+    angle: -Math.PI / 4, shown: false, moving: false,
+  };
 
   document.addEventListener("mousemove", (event) => {
+    if (!state.shown) {
+      state.x = state.mx = event.clientX;
+      state.y = state.my = event.clientY;
+      state.shown = true;
+      cursor.classList.add("visible");
+    }
     state.mx = event.clientX;
     state.my = event.clientY;
-    state.target = event.target.closest?.("a, button, [role='button']") ? 1 : 0;
+    cursor.classList.toggle("over", !!event.target.closest?.("a, button, [role='button']"));
+  });
+  document.addEventListener("mousedown", () => cursor.classList.add("pressed"));
+  document.addEventListener("mouseup", () => cursor.classList.remove("pressed"));
+  root.addEventListener("mouseleave", () => {
+    state.shown = false;
+    cursor.classList.remove("visible");
   });
 
+  const TAU = Math.PI * 2;
   function frame() {
-    state.t += 0.045;
-    state.x += (state.mx - state.x) * 0.16;
-    state.y += (state.my - state.y) * 0.16;
-    state.over += (state.target - state.over) * 0.12;
+    const dx = (state.mx - state.x) * 0.2;
+    const dy = (state.my - state.y) * 0.2;
+    state.x += dx;
+    state.y += dy;
+    const speed = Math.hypot(dx, dy);
 
-    ring.canvas.style.transform = `translate3d(${state.x - 20}px, ${state.y - 20}px, 0)`;
-    dot.canvas.style.transform = `translate3d(${state.mx - 5}px, ${state.my - 5}px, 0)`;
+    // vira a cabeça na direção do movimento (menor caminho, suavizado)
+    if (speed > 0.6) {
+      const target = Math.atan2(dy, dx) + Math.PI / 2;
+      let diff = (target - state.angle) % TAU;
+      if (diff > Math.PI) diff -= TAU;
+      if (diff < -Math.PI) diff += TAU;
+      state.angle += diff * 0.18;
+    }
 
-    const radius = 15 * (1 + 0.4 * state.over);
-    const thickness = 0.34 - 0.16 * state.over;
-    paint(ring.ctx, 40, 3, (dist, angle) => {
-      const r = dist / radius;
-      if (r > 1.05) return 0;
-      const wobble =
-        0.78 + 0.09 * Math.sin(3 * angle - 2.2 * state.t) + 0.05 * Math.sin(1.4 * state.t);
-      return 1 - Math.abs(r - wobble) / thickness;
-    });
+    const moving = speed > 0.5;
+    if (moving !== state.moving) {
+      state.moving = moving;
+      cursor.classList.toggle("moving", moving);
+    }
 
-    const dotRadius = 4 * (1 - 0.45 * state.over);
-    paint(dot.ctx, 10, 2, (dist) => {
-      const r = dist / dotRadius;
-      if (r > 1) return 0;
-      return 1.05 - 0.55 * r + 0.16 * Math.sin(3.1 * state.t - 4 * r);
-    });
-
+    cursor.style.transform =
+      `translate3d(${state.x}px, ${state.y}px, 0) rotate(${state.angle}rad)`;
     requestAnimationFrame(frame);
   }
-
-  // esconde o cursor quando o mouse sai da janela
-  root.addEventListener("mouseleave", () => {
-    state.mx = state.x = -999;
-    state.my = state.y = -999;
-  });
-
   requestAnimationFrame(frame);
 })();
