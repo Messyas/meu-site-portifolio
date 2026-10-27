@@ -320,10 +320,11 @@ copyButton?.addEventListener("click", async () => {
 });
 
 /* ==========================================================================
-   Cursor vetorial em forma de jabuti (SVG).
-   Segue o mouse com um pouco de atraso, vira a cabeça para onde você move,
-   mexe as patas enquanto anda, cresce sobre links/botões e esconde a cabeça
-   no casco quando você clica. Só liga em telas largas com mouse.
+   Cursor jabuti em dither (quadradinhos, como o cursor do kc1t.com).
+   Um jabuti vetorial é desenhado num canvas pequeno e depois "pontilhado"
+   com uma matriz de Bayer 4x4. Anda atrás do mouse com atraso, vira para
+   onde você move, mexe as patas, cresce sobre links e recolhe a cabeça ao
+   clicar. Um ponto dither marca a posição exata do mouse.
    ========================================================================== */
 
 (function jabutiCursor() {
@@ -333,74 +334,185 @@ copyButton?.addEventListener("click", async () => {
     !window.matchMedia("(pointer: coarse)").matches;
   if (!finePointer || window.innerWidth < 768) return;
 
-  const cursor = document.createElement("div");
-  cursor.className = "jabuti";
-  cursor.setAttribute("aria-hidden", "true");
-  cursor.innerHTML = `
-    <div class="jabuti-inner">
-      <svg viewBox="0 0 48 48" focusable="false">
-        <path class="tail" d="M24 39.5 21.4 46.2Q24 44.4 26.6 46.2Z" />
-        <g class="leg bl" style="transform-origin: 16px 33px">
-          <ellipse cx="10" cy="35.5" rx="5.2" ry="3" transform="rotate(-32 10 35.5)" />
-        </g>
-        <g class="leg br" style="transform-origin: 32px 33px">
-          <ellipse cx="38" cy="35.5" rx="5.2" ry="3" transform="rotate(32 38 35.5)" />
-        </g>
-        <g class="leg fl" style="transform-origin: 16px 17px">
-          <ellipse cx="9.5" cy="14.5" rx="5.2" ry="3" transform="rotate(36 9.5 14.5)" />
-        </g>
-        <g class="leg fr" style="transform-origin: 32px 17px">
-          <ellipse cx="38.5" cy="14.5" rx="5.2" ry="3" transform="rotate(-36 38.5 14.5)" />
-        </g>
-        <g class="head" style="transform-origin: 24px 15px">
-          <ellipse cx="24" cy="8.2" rx="4.1" ry="5.3" />
-          <circle class="eye" cx="22.3" cy="6.9" r="0.85" />
-          <circle class="eye" cx="25.7" cy="6.9" r="0.85" />
-        </g>
-        <ellipse class="shell" cx="24" cy="26" rx="13" ry="15" />
-        <g class="scutes">
-          <ellipse cx="24" cy="26" rx="10.6" ry="12.6" />
-          <path d="M24 19.6 29.3 22.7V28.9L24 32 18.7 28.9V22.7Z" />
-          <path d="M24 19.6V13.6M29.3 22.7 34.6 19.8M29.3 28.9 34.6 32.2M24 32V38.4M18.7 28.9 13.4 32.2M18.7 22.7 13.4 19.8" />
-        </g>
-      </svg>
-    </div>`;
-  document.body.appendChild(cursor);
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const COLOR = "#f0ece8";
+
+  function makeCanvas(size) {
+    const c = document.createElement("canvas");
+    c.width = c.height = size * dpr;
+    c.style.cssText =
+      `position:fixed;top:0;left:0;width:${size}px;height:${size}px;pointer-events:none;` +
+      "z-index:999999;mix-blend-mode:difference;will-change:transform;opacity:0;transition:opacity .25s";
+    c.setAttribute("aria-hidden", "true");
+    document.body.appendChild(c);
+    const ctx = c.getContext("2d");
+    ctx.scale(dpr, dpr);
+    return { c, ctx, size };
+  }
+
+  // ---- jabuti (canvas de alta resolução -> grade de 20x20 células) ----
+  const CELLS = 30, CELL = 2, SIZE = CELLS * CELL; // 60px
+  const HI = 240;
+  const hi = document.createElement("canvas");
+  hi.width = hi.height = HI;
+  const hctx = hi.getContext("2d", { willReadFrequently: true });
+  const lo = document.createElement("canvas");
+  lo.width = lo.height = CELLS;
+  const lctx = lo.getContext("2d", { willReadFrequently: true });
+
+  function ell(ctx, cx, cy, rx, ry, rot) {
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, rot || 0, 0, Math.PI * 2);
+  }
+
+  // desenha no espaço 48x48 (cabeça para cima, centro em 24,24)
+  function drawTurtle(angle, scale, walk, head) {
+    hctx.setTransform(1, 0, 0, 1, 0, 0);
+    hctx.clearRect(0, 0, HI, HI);
+    hctx.globalCompositeOperation = "source-over";
+    hctx.translate(HI / 2, HI / 2);
+    hctx.rotate(angle);
+    hctx.scale((HI / 48) * scale, (HI / 48) * scale);
+    hctx.translate(-24, -24);
+
+    // patas (alternando em diagonal)
+    const sw = Math.sin(walk) * 0.45;
+    const legs = [
+      [16, 17, 9.5, 14.5, 0.63, sw],   // frente esq
+      [32, 17, 38.5, 14.5, -0.63, -sw], // frente dir
+      [16, 33, 10, 35.5, -0.56, -sw],  // trás esq
+      [32, 33, 38, 35.5, 0.56, sw],    // trás dir
+    ];
+    hctx.fillStyle = "rgba(255,255,255,.8)";
+    for (const [px, py, cx, cy, rot, a] of legs) {
+      hctx.save();
+      hctx.translate(px, py);
+      hctx.rotate(a);
+      hctx.translate(-px, -py);
+      ell(hctx, cx, cy, 5.6, 3.3, rot);
+      hctx.fill();
+      hctx.restore();
+    }
+    // rabinho
+    hctx.beginPath();
+    hctx.moveTo(24, 39);
+    hctx.lineTo(21, 46.5);
+    hctx.lineTo(27, 46.5);
+    hctx.closePath();
+    hctx.fill();
+    // cabeça (recolhe ao clicar)
+    hctx.fillStyle = "rgba(255,255,255,.95)";
+    ell(hctx, 24, 8.2 + head * 9, 4.4, 5.6 - head * 2.4);
+    hctx.fill();
+    // vão entre o casco e as patas/cabeça
+    hctx.globalCompositeOperation = "destination-out";
+    hctx.fillStyle = "#000";
+    ell(hctx, 24, 26, 15.2, 17.2);
+    hctx.fill();
+    hctx.globalCompositeOperation = "source-over";
+    // casco
+    hctx.fillStyle = "#fff";
+    ell(hctx, 24, 26, 13.4, 15.4);
+    hctx.fill();
+    // escudos: linhas "apagam" parte da trama para desenhar o hexágono
+    hctx.globalCompositeOperation = "destination-out";
+    hctx.strokeStyle = "rgba(0,0,0,.9)";
+    hctx.lineWidth = 1.5;
+    hctx.lineJoin = hctx.lineCap = "round";
+    hctx.beginPath();
+    hctx.moveTo(24, 19.6); hctx.lineTo(29.3, 22.7); hctx.lineTo(29.3, 28.9);
+    hctx.lineTo(24, 32); hctx.lineTo(18.7, 28.9); hctx.lineTo(18.7, 22.7); hctx.closePath();
+    hctx.moveTo(24, 19.6); hctx.lineTo(24, 13.4);
+    hctx.moveTo(29.3, 22.7); hctx.lineTo(34.8, 19.6);
+    hctx.moveTo(29.3, 28.9); hctx.lineTo(34.8, 32.2);
+    hctx.moveTo(24, 32); hctx.lineTo(24, 38.6);
+    hctx.moveTo(18.7, 28.9); hctx.lineTo(13.2, 32.2);
+    hctx.moveTo(18.7, 22.7); hctx.lineTo(13.2, 19.6);
+    hctx.stroke();
+    hctx.setTransform(1, 0, 0, 1, 0, 0);
+    hctx.globalCompositeOperation = "source-over";
+
+    // reduz para a grade de células e lê a densidade
+    lctx.clearRect(0, 0, CELLS, CELLS);
+    lctx.imageSmoothingEnabled = true;
+    lctx.imageSmoothingQuality = "high";
+    lctx.drawImage(hi, 0, 0, CELLS, CELLS);
+    return lctx.getImageData(0, 0, CELLS, CELLS).data;
+  }
+
+  function paintTurtle(ctx, data) {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    ctx.fillStyle = COLOR;
+    for (let y = 0; y < CELLS; y++) {
+      for (let x = 0; x < CELLS; x++) {
+        const v = data[(y * CELLS + x) * 4 + 3] / 255;
+        if (v > 0.06 && v > BAYER[y % 4][x % 4] / 16) {
+          ctx.globalAlpha = Math.min(1, v + 0.15);
+          ctx.fillRect(x * CELL, y * CELL, CELL - 0.5, CELL - 0.5);
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ---- ponto exato do mouse ----
+  function paintDot(ctx, size, cell, radius) {
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = COLOR;
+    const c = size / 2;
+    for (let y = 0; y < size; y += cell) {
+      for (let x = 0; x < size; x += cell) {
+        const r = Math.hypot(x + cell / 2 - c, y + cell / 2 - c) / radius;
+        const v = 1.05 - 0.55 * r;
+        if (v > 0 && v > BAYER[(y / cell) % 4][(x / cell) % 4] / 16) {
+          ctx.globalAlpha = Math.min(1, v);
+          ctx.fillRect(x, y, cell - 1, cell - 1);
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  const body = makeCanvas(SIZE);
+  const dot = makeCanvas(10);
   root.classList.add("has-cursor");
 
-  // começa olhando para o canto superior esquerdo, como uma seta
   const state = {
     mx: -999, my: -999, x: -999, y: -999,
-    angle: -Math.PI / 4, shown: false, moving: false,
+    angle: -Math.PI / 4, shown: false,
+    over: 0, target: 0, press: 0, pressT: 0, walk: 0, walkAmp: 0, t: 0,
   };
 
-  document.addEventListener("mousemove", (event) => {
+  document.addEventListener("mousemove", (e) => {
     if (!state.shown) {
-      state.x = state.mx = event.clientX;
-      state.y = state.my = event.clientY;
+      state.x = state.mx = e.clientX;
+      state.y = state.my = e.clientY;
       state.shown = true;
-      cursor.classList.add("visible");
+      body.c.style.opacity = dot.c.style.opacity = "1";
     }
-    state.mx = event.clientX;
-    state.my = event.clientY;
-    cursor.classList.toggle("over", !!event.target.closest?.("a, button, [role='button']"));
+    state.mx = e.clientX;
+    state.my = e.clientY;
+    state.target = e.target.closest?.("a, button, [role='button']") ? 1 : 0;
   });
-  document.addEventListener("mousedown", () => cursor.classList.add("pressed"));
-  document.addEventListener("mouseup", () => cursor.classList.remove("pressed"));
+  document.addEventListener("mousedown", () => (state.pressT = 1));
+  document.addEventListener("mouseup", () => (state.pressT = 0));
   root.addEventListener("mouseleave", () => {
     state.shown = false;
-    cursor.classList.remove("visible");
+    body.c.style.opacity = dot.c.style.opacity = "0";
   });
 
   const TAU = Math.PI * 2;
+  let lastDot = -1;
   function frame() {
-    const dx = (state.mx - state.x) * 0.2;
-    const dy = (state.my - state.y) * 0.2;
+    state.t += 0.045;
+    const dx = (state.mx - state.x) * 0.16;
+    const dy = (state.my - state.y) * 0.16;
     state.x += dx;
     state.y += dy;
     const speed = Math.hypot(dx, dy);
 
-    // vira a cabeça na direção do movimento (menor caminho, suavizado)
     if (speed > 0.6) {
       const target = Math.atan2(dy, dx) + Math.PI / 2;
       let diff = (target - state.angle) % TAU;
@@ -408,15 +520,22 @@ copyButton?.addEventListener("click", async () => {
       if (diff < -Math.PI) diff += TAU;
       state.angle += diff * 0.18;
     }
+    state.over += (state.target - state.over) * 0.12;
+    state.press += (state.pressT - state.press) * 0.25;
+    state.walkAmp += ((speed > 0.5 && !reduce ? 1 : 0) - state.walkAmp) * 0.2;
+    state.walk += 0.28 * state.walkAmp;
 
-    const moving = speed > 0.5;
-    if (moving !== state.moving) {
-      state.moving = moving;
-      cursor.classList.toggle("moving", moving);
+    const scale = 0.85 * (1 + 0.25 * state.over) * (1 - 0.1 * state.press);
+    const data = drawTurtle(state.angle, scale, state.walk, state.press);
+    paintTurtle(body.ctx, data);
+    body.c.style.transform = `translate3d(${state.x - SIZE / 2}px, ${state.y - SIZE / 2}px, 0)`;
+
+    const dotR = Math.round(4 * (1 - 0.45 * state.over) * 10) / 10;
+    if (dotR !== lastDot) {
+      paintDot(dot.ctx, 10, 2, dotR);
+      lastDot = dotR;
     }
-
-    cursor.style.transform =
-      `translate3d(${state.x}px, ${state.y}px, 0) rotate(${state.angle}rad)`;
+    dot.c.style.transform = `translate3d(${state.mx - 5}px, ${state.my - 5}px, 0)`;
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
